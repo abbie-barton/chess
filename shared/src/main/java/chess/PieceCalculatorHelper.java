@@ -48,8 +48,16 @@ public class PieceCalculatorHelper {
             int newRow = row + counter * rowIncrement;
             int newCol = col + counter * colIncrement;
             // Check if the new position is within bounds and if a piece is not blocking the way
-            if ((newRow >= 1 && newRow <= 8 && newCol >= 1 && newCol <= 8) && board.getPiece(new ChessPosition(newRow, newCol)) == null) {
-                moveList.add(new ChessMove(myPosition, new ChessPosition(newRow, newCol), null));
+            if ((newRow >= 1 && newRow <= 8 && newCol >= 1 && newCol <= 8)) {
+                ChessPiece newPiece = board.getPiece(new ChessPosition(newRow, newCol));
+                // logic to add a possible move to capture a piece of the opposing color, but go no farther
+                if (newPiece != null && board.getPiece(myPosition).getTeamColor() != newPiece.getTeamColor()) {
+                    moveList.add(new ChessMove(myPosition, new ChessPosition(newRow, newCol), null));
+                    isValid = 0;
+                // if there is no piece at that position, add a move
+                } else if (newPiece == null) {
+                    moveList.add(new ChessMove(myPosition, new ChessPosition(newRow, newCol), null));
+                }
             } else {
                 isValid = 0;
             }
