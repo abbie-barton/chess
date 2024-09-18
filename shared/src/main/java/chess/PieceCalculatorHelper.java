@@ -20,6 +20,9 @@ public class PieceCalculatorHelper {
         else if (currentPieceType == ChessPiece.PieceType.ROOK) {
             moveList = rookCalculator(myPosition, board);
         }
+        else if (currentPieceType == ChessPiece.PieceType.QUEEN) {
+            moveList = queenCalculator(myPosition, board);
+        }
 
         return moveList;
     }
@@ -47,6 +50,15 @@ public class PieceCalculatorHelper {
         addMovesInDirection(moveList, myPosition, board, row, col, -1, 0);  // down
         addMovesInDirection(moveList, myPosition, board, row, col, 0, -1); // left
         addMovesInDirection(moveList, myPosition, board, row, col, 0, 1);  // right
+
+        return moveList;
+    }
+
+    public static Collection<ChessMove> queenCalculator(ChessPosition myPosition, ChessBoard board) {
+        Collection<ChessMove> moveList = new ArrayList<ChessMove>();
+
+        moveList.addAll(rookCalculator(myPosition, board));
+        moveList.addAll(bishopCalculator(myPosition, board));
 
         return moveList;
     }
