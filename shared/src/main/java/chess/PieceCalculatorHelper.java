@@ -10,23 +10,21 @@ public class PieceCalculatorHelper {
     }
 
     public static Collection<ChessMove> calculatePieceMoves(ChessBoard board, ChessPosition myPosition) {
-        System.out.println("pieceCalculatorHelper calculatePieceMoves");
-
         ChessPiece currentPiece = board.getPiece(myPosition);
-        System.out.println("piece: " + currentPiece);
         ChessPiece.PieceType currentPieceType = currentPiece.getPieceType();
-        ChessGame.TeamColor currentPieceColor = currentPiece.getTeamColor();
         Collection<ChessMove> moveList = new ArrayList<ChessMove>();
 
         if (currentPieceType == ChessPiece.PieceType.BISHOP) {
-            moveList = bishopCalculator(currentPiece, currentPieceColor, myPosition, board);
+            moveList = bishopCalculator(myPosition, board);
         }
+        else if (currentPieceType == ChessPiece.PieceType.ROOK) {
+            moveList = rookCalculator(myPosition, board);
+        }
+
         return moveList;
     }
 
-    public static Collection<ChessMove> bishopCalculator(ChessPiece currentPiece, ChessGame.TeamColor currentPieceColor, ChessPosition myPosition, ChessBoard board) {
-        System.out.println("pieceCalculatorHelper bishopCalculator");
-
+    public static Collection<ChessMove> bishopCalculator(ChessPosition myPosition, ChessBoard board) {
         Collection<ChessMove> moveList = new ArrayList<ChessMove>();
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
@@ -36,6 +34,19 @@ public class PieceCalculatorHelper {
         addMovesInDirection(moveList, myPosition, board, row, col, 1, -1);  // Diagonal up-left
         addMovesInDirection(moveList, myPosition, board, row, col, -1, -1); // Diagonal down-left
         addMovesInDirection(moveList, myPosition, board, row, col, -1, 1);  // Diagonal down-right
+
+        return moveList;
+    }
+
+    public static Collection<ChessMove> rookCalculator(ChessPosition myPosition, ChessBoard board) {
+        Collection<ChessMove> moveList = new ArrayList<ChessMove>();
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+
+        addMovesInDirection(moveList, myPosition, board, row, col, 1, 0);   // up
+        addMovesInDirection(moveList, myPosition, board, row, col, -1, 0);  // down
+        addMovesInDirection(moveList, myPosition, board, row, col, 0, -1); // left
+        addMovesInDirection(moveList, myPosition, board, row, col, 0, 1);  // right
 
         return moveList;
     }
@@ -57,6 +68,8 @@ public class PieceCalculatorHelper {
                 // if there is no piece at that position, add a move
                 } else if (newPiece == null) {
                     moveList.add(new ChessMove(myPosition, new ChessPosition(newRow, newCol), null));
+                } else {
+                    isValid = 0;
                 }
             } else {
                 isValid = 0;
