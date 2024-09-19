@@ -23,6 +23,17 @@ public class PieceCalculatorHelper {
         else if (currentPieceType == ChessPiece.PieceType.QUEEN) {
             moveList = queenCalculator(myPosition, board);
         }
+        else if (currentPieceType == ChessPiece.PieceType.KNIGHT) {
+            moveList = knightCalculator(myPosition, board);
+        }
+        else if (currentPieceType == ChessPiece.PieceType.KING) {
+            // king calculator
+            System.out.println("king calculator");
+        }
+        else if (currentPieceType == ChessPiece.PieceType.PAWN) {
+            // pawn calculator
+            System.out.println("pawn calculator");
+        }
 
         return moveList;
     }
@@ -72,6 +83,10 @@ public class PieceCalculatorHelper {
         addLimitedMovesInDirection(moveList, myPosition, board, row, col, 2, -1);
         addLimitedMovesInDirection(moveList, myPosition, board, row, col, -2, 1);
         addLimitedMovesInDirection(moveList, myPosition, board, row, col, -2, -1);
+        addLimitedMovesInDirection(moveList, myPosition, board, row, col, 1, 2);
+        addLimitedMovesInDirection(moveList, myPosition, board, row, col, 1, -2);
+        addLimitedMovesInDirection(moveList, myPosition, board, row, col, -1, 2);
+        addLimitedMovesInDirection(moveList, myPosition, board, row, col, -1, -2);
 
         return moveList;
     }
