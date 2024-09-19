@@ -63,6 +63,19 @@ public class PieceCalculatorHelper {
         return moveList;
     }
 
+    public static Collection<ChessMove> knightCalculator(ChessPosition myPosition, ChessBoard board) {
+        Collection<ChessMove> moveList = new ArrayList<ChessMove>();
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+
+        addLimitedMovesInDirection(moveList, myPosition, board, row, col, 2, 1);
+        addLimitedMovesInDirection(moveList, myPosition, board, row, col, 2, -1);
+        addLimitedMovesInDirection(moveList, myPosition, board, row, col, -2, 1);
+        addLimitedMovesInDirection(moveList, myPosition, board, row, col, -2, -1);
+
+        return moveList;
+    }
+
     private static void addMovesInDirection(Collection<ChessMove> moveList, ChessPosition myPosition, ChessBoard board, int row, int col, int rowIncrement, int colIncrement) {
         int counter = 1;
         int isValid = 1;
@@ -87,6 +100,24 @@ public class PieceCalculatorHelper {
                 isValid = 0;
             }
             counter += 1;
+        }
+    }
+
+    private static void addLimitedMovesInDirection(Collection<ChessMove> moveList, ChessPosition myPosition, ChessBoard board, int row, int col, int rowIncrement, int colIncrement) {
+        // go forward only one time (ex for knight and king)
+        int newRow = row + rowIncrement;
+        int newCol = col + colIncrement;
+
+        // Check if the new position is within bounds and if a piece is not blocking the way
+        if ((newRow >= 1 && newRow <= 8 && newCol >= 1 && newCol <= 8)) {
+            ChessPiece newPiece = board.getPiece(new ChessPosition(newRow, newCol));
+            // logic to add a possible move to capture a piece of the opposing color, but go no farther
+            if (newPiece != null && board.getPiece(myPosition).getTeamColor() != newPiece.getTeamColor()) {
+                moveList.add(new ChessMove(myPosition, new ChessPosition(newRow, newCol), null));
+                // if there is no piece at that position, add a move
+            } else if (newPiece == null) {
+                moveList.add(new ChessMove(myPosition, new ChessPosition(newRow, newCol), null));
+            }
         }
     }
 }
