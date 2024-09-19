@@ -27,8 +27,7 @@ public class PieceCalculatorHelper {
             moveList = knightCalculator(myPosition, board);
         }
         else if (currentPieceType == ChessPiece.PieceType.KING) {
-            // king calculator
-            System.out.println("king calculator");
+            moveList = kingCalculator(myPosition, board);
         }
         else if (currentPieceType == ChessPiece.PieceType.PAWN) {
             // pawn calculator
@@ -87,6 +86,23 @@ public class PieceCalculatorHelper {
         addLimitedMovesInDirection(moveList, myPosition, board, row, col, 1, -2);
         addLimitedMovesInDirection(moveList, myPosition, board, row, col, -1, 2);
         addLimitedMovesInDirection(moveList, myPosition, board, row, col, -1, -2);
+
+        return moveList;
+    }
+
+    private static Collection<ChessMove> kingCalculator(ChessPosition myPosition, ChessBoard board) {
+        Collection<ChessMove> moveList = new ArrayList<ChessMove>();
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+
+        addLimitedMovesInDirection(moveList, myPosition, board, row, col, 1, 1);
+        addLimitedMovesInDirection(moveList, myPosition, board, row, col, 1, -1);
+        addLimitedMovesInDirection(moveList, myPosition, board, row, col, 1, 0);
+        addLimitedMovesInDirection(moveList, myPosition, board, row, col, -1, 1);
+        addLimitedMovesInDirection(moveList, myPosition, board, row, col, -1, -1);
+        addLimitedMovesInDirection(moveList, myPosition, board, row, col, -1, 0);
+        addLimitedMovesInDirection(moveList, myPosition, board, row, col, 0, 1);
+        addLimitedMovesInDirection(moveList, myPosition, board, row, col, 0, -1);
 
         return moveList;
     }
