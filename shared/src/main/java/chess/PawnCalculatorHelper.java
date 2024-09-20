@@ -58,7 +58,7 @@ public class PawnCalculatorHelper {
                 }
             }
         }
-        if (row + 1 <= 8 && col - 1 <= 8) {
+        if (row + 1 <= 8 && col - 1 >= 1) {
             ChessPiece newPiece = board.getPiece(new ChessPosition(row + 1, col - 1));
             if (newPiece != null && newPiece.getTeamColor() == ChessGame.TeamColor.BLACK) {
                 // promotion
