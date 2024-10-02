@@ -57,7 +57,12 @@ public class ChessGame {
         moveList.addAll(currentPiece.pieceMoves(board, startPosition));
 
         for (ChessMove move : moveList) {
-            this.makeMove(move);
+            // make move checks if each move is valid or not - if it is invalid, then remove it from moveList
+            try {
+                this.makeMove(move);
+            } catch (InvalidMoveException) {
+
+            }
         }
 
         return moveList;
@@ -70,12 +75,26 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        boolean valid = checkMove(move);
+        if (!valid) {
+            throw new InvalidMoveException();
+        } else {
+            board.addPiece(move.getStartPosition(), null);
+            if (move.getPromotionPiece() != null) {
+                board.addPiece(move.getEndPosition(), new ChessPiece(this.teamTurn, move.getPromotionPiece()));
+            } else {
+                board.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
+            }
+        }
+    }
+
+    public boolean checkMove(ChessMove move) {
         ChessPiece currPiece = board.getPiece(move.getStartPosition());
         ChessPiece therePiece = null;
 
         if (currPiece.getTeamColor() != this.teamTurn) {
             // if the piece color is not this.teamTurn
-            throw new InvalidMoveException();
+            return false;
         }
         if (board.getPiece(move.getEndPosition()) != null) {
             // if there is a piece at end position, set therePiece to that piece
@@ -83,10 +102,6 @@ public class ChessGame {
         }
 
         // add temp pieces to board
-        if (move.getPromotionPiece() != null) {
-            // if promotion piece, add that to the board
-            board.addPiece(move.getEndPosition(), new ChessPiece(this.teamTurn, move.getPromotionPiece()));
-        }
         board.addPiece(move.getEndPosition(), currPiece);
         board.addPiece(move.getStartPosition(), null);
 
@@ -99,8 +114,17 @@ public class ChessGame {
             } else {
                 board.addPiece(move.getEndPosition(), null);
             }
-            throw new InvalidMoveException();
+            return false;
         }
+
+        // undo - the move is valid
+        board.addPiece(move.getStartPosition(), currPiece);
+        if (board.getPiece(move.getEndPosition()) != null) {
+            board.addPiece(move.getEndPosition(), therePiece);
+        } else {
+            board.addPiece(move.getEndPosition(), null);
+        }
+        return true;
     }
 
     /**
@@ -121,6 +145,8 @@ public class ChessGame {
      */
     public boolean isInCheckmate(TeamColor teamColor) {
         throw new RuntimeException("Not implemented");
+        // make a copy of the board, move the king to every valid spot it can move to.
+        // if in check in every spot, then checkmate = true
     }
 
     /**
