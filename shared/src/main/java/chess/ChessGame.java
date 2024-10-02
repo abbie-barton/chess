@@ -50,11 +50,15 @@ public class ChessGame {
      * @return Set of valid moves for requested piece, or null if no piece at
      * startPosition
      */
-    public Collection<ChessMove> validMoves(ChessPosition startPosition) {
+    public Collection<ChessMove> validMoves(ChessPosition startPosition) throws InvalidMoveException {
         Collection<ChessMove> moveList = new ArrayList<ChessMove>();
         ChessPiece currentPiece = board.getPiece(startPosition);
 
         moveList.addAll(currentPiece.pieceMoves(board, startPosition));
+
+        for (ChessMove move : moveList) {
+            this.makeMove(move);
+        }
 
         return moveList;
     }
@@ -69,13 +73,26 @@ public class ChessGame {
         ChessPiece currPiece = board.getPiece(move.getStartPosition());
         ChessPiece therePiece = null;
 
+        if (currPiece.getTeamColor() != this.teamTurn) {
+            // if the piece color is not this.teamTurn
+            throw new InvalidMoveException();
+        }
         if (board.getPiece(move.getEndPosition()) != null) {
             // if there is a piece at end position, set therePiece to that piece
             therePiece = board.getPiece(move.getEndPosition());
         }
+
+        // add temp pieces to board
+        if (move.getPromotionPiece() != null) {
+            // if promotion piece, add that to the board
+            board.addPiece(move.getEndPosition(), new ChessPiece(this.teamTurn, move.getPromotionPiece()));
+        }
         board.addPiece(move.getEndPosition(), currPiece);
         board.addPiece(move.getStartPosition(), null);
+
+        // if invalid move, throw exception
         if (isInCheck(this.teamTurn) || isInCheckmate(this.teamTurn)) {
+            // if in check or checkmate, undo those moves
             board.addPiece(move.getStartPosition(), currPiece);
             if (board.getPiece(move.getEndPosition()) != null) {
                 board.addPiece(move.getEndPosition(), therePiece);
