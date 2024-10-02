@@ -62,7 +62,7 @@ public class ChessGame {
                 this.checkMove(move);
                 validMoves.add(move);
             } catch (Exception InvalidMoveException) {
-                // do something here
+                throw new InvalidMoveException();
             }
         }
 
@@ -145,9 +145,40 @@ public class ChessGame {
      */
     public boolean isInCheckmate(TeamColor teamColor) {
         ChessBoard tempBoard = board;
-        throw new RuntimeException("Not implemented");
-        // make a copy of the board, move the king to every valid spot it can move to.
-        // if in check in every spot, then checkmate = true
+        ChessPosition kingPosition = null;
+
+        // find the position of the king
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                ChessPiece tempPiece = board.getPiece(new ChessPosition(i, j));
+                if (tempPiece != null && tempPiece.getPieceType() == ChessPiece.PieceType.KING) {
+                    kingPosition = new ChessPosition(i, j);
+                    break;
+                }
+            }
+        }
+
+        // go through the king's possible moves and see if they are in check or not
+        if (kingPosition == null) {
+            // no king on the board
+            return false;
+        }
+
+        ChessPiece king = board.getPiece(kingPosition);
+        Collection<ChessMove> kingMoves = king.pieceMoves(board, kingPosition);
+        Collection<ChessMove> validMoves = new ArrayList<ChessMove>();
+
+        for (ChessMove move : kingMoves) {
+            try {
+                this.checkMove(move);
+                validMoves.add(move);
+            } catch (Exception InvalidMoveException) {
+                // found a move that ends in check
+            }
+        }
+
+        // no valid moves - king is in checkmate
+        return validMoves.isEmpty();
     }
 
     /**
