@@ -51,21 +51,22 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) throws InvalidMoveException {
-        Collection<ChessMove> moveList = new ArrayList<ChessMove>();
         ChessPiece currentPiece = board.getPiece(startPosition);
 
-        moveList.addAll(currentPiece.pieceMoves(board, startPosition));
+        Collection<ChessMove> moveList = new ArrayList<ChessMove>(currentPiece.pieceMoves(board, startPosition));
+        Collection<ChessMove> validMoves = new ArrayList<ChessMove>();
 
         for (ChessMove move : moveList) {
             // make move checks if each move is valid or not - if it is invalid, then remove it from moveList
             try {
-                this.makeMove(move);
-            } catch (InvalidMoveException) {
-
+                this.checkMove(move);
+                validMoves.add(move);
+            } catch (Exception InvalidMoveException) {
+                // do something here
             }
         }
 
-        return moveList;
+        return validMoves;
     }
 
     /**
@@ -75,26 +76,26 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        boolean valid = checkMove(move);
-        if (!valid) {
-            throw new InvalidMoveException();
-        } else {
+        try {
+            checkMove(move);
             board.addPiece(move.getStartPosition(), null);
             if (move.getPromotionPiece() != null) {
                 board.addPiece(move.getEndPosition(), new ChessPiece(this.teamTurn, move.getPromotionPiece()));
             } else {
                 board.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
             }
+        } catch (Exception InvalidMoveException) {
+            throw new InvalidMoveException();
         }
     }
 
-    public boolean checkMove(ChessMove move) {
+    public void checkMove(ChessMove move) throws InvalidMoveException {
         ChessPiece currPiece = board.getPiece(move.getStartPosition());
         ChessPiece therePiece = null;
 
         if (currPiece.getTeamColor() != this.teamTurn) {
             // if the piece color is not this.teamTurn
-            return false;
+            throw new InvalidMoveException();
         }
         if (board.getPiece(move.getEndPosition()) != null) {
             // if there is a piece at end position, set therePiece to that piece
@@ -114,7 +115,7 @@ public class ChessGame {
             } else {
                 board.addPiece(move.getEndPosition(), null);
             }
-            return false;
+            throw new InvalidMoveException();
         }
 
         // undo - the move is valid
@@ -124,7 +125,6 @@ public class ChessGame {
         } else {
             board.addPiece(move.getEndPosition(), null);
         }
-        return true;
     }
 
     /**
@@ -144,6 +144,7 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
+        ChessBoard tempBoard = board;
         throw new RuntimeException("Not implemented");
         // make a copy of the board, move the king to every valid spot it can move to.
         // if in check in every spot, then checkmate = true
