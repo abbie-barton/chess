@@ -169,43 +169,35 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        // do any pieces have valid moves not just king
         ChessBoard tempBoard = board;
         ChessPosition kingPosition = findKingPosition(teamColor);
+        Collection<ChessMove> validMoves = new ArrayList<>();
 
-        // get pieceMoves for every piece on the board of your team
-        // and then make the move on the tempBoard
-        // then check to see if, after making the move, king is still in check
-        // if the king is still in check for every move possibility, king is in checkmate
-        for (int i = 1; i <= 8; i++) {
-            for (int j = 1; j <= 8; j++) {
-                ChessPiece tempPiece = board.getPiece(new ChessPosition(i, j));
-                if (tempPiece != null && tempPiece.getTeamColor() == this.teamTurn) {
-                    // call pieceMoves on each and see if the king is at the endPosition of the move
-                    Collection<ChessMove> moves = tempPiece.pieceMoves(board, new ChessPosition(i, j));
-                    for (ChessMove move : moves) {
-
-                    }
-                }
-            }
-        }
-
-        // go through the king's possible moves and see if they are in check or not
         if (kingPosition == null) {
             // no king on the board
             return false;
         }
 
-        ChessPiece king = board.getPiece(kingPosition);
-        Collection<ChessMove> kingMoves = king.pieceMoves(board, kingPosition);
-        Collection<ChessMove> validMoves = new ArrayList<ChessMove>();
-
-        for (ChessMove move : kingMoves) {
-            try {
-                this.checkMove(move);
-                validMoves.add(move);
-            } catch (Exception InvalidMoveException) {
-                // found a move that ends in check
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                ChessPiece tempPiece = board.getPiece(new ChessPosition(i, j));
+                if (tempPiece != null && tempPiece.getTeamColor() == this.teamTurn) {
+                    // call pieceMoves on each piece on current team
+                    Collection<ChessMove> moves = tempPiece.pieceMoves(board, new ChessPosition(i, j));
+                    for (ChessMove move : moves) {
+                        // make move on board
+                        try {
+                            this.makeMove(move);
+                            // king is not in check if exception isn't thrown
+                            validMoves.add(move);
+                        } catch (Exception InvalidMoveException) {
+                            // move is invalid or king is in check/checkmate
+                        } finally {
+                            // reset board
+                            board = tempBoard;
+                        }
+                    }
+                }
             }
         }
 
