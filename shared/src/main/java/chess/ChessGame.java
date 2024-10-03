@@ -150,11 +150,13 @@ public class ChessGame {
         for (int i = 1; i <= 8; i++) {
             for (int j = 1; j <= 8; j++) {
                 ChessPiece tempPiece = board.getPiece(new ChessPosition(i, j));
-                if (tempPiece != null && tempPiece.getTeamColor() != this.teamTurn) {
+                if (tempPiece != null && tempPiece.getTeamColor() != teamColor) {
                     // call pieceMoves on each and see if the king is at the endPosition of the move
                     Collection<ChessMove> moves = tempPiece.pieceMoves(board, new ChessPosition(i, j));
                     for (ChessMove move : moves) {
-                        if (move.getEndPosition() == kingPosition) {
+                        // if king is at endPosition of the move, king is in check
+                        if (move.getEndPosition().getRow() == kingPosition.getRow() &&
+                            move.getEndPosition().getColumn() == kingPosition.getColumn()) {
                             return true;
                         }
                     }
@@ -162,7 +164,7 @@ public class ChessGame {
             }
         }
 
-        return true;
+        return false;
     }
 
     /**
@@ -231,7 +233,7 @@ public class ChessGame {
             for (int j = 1; j <= 8; j++) {
                 ChessPiece tempPiece = board.getPiece(new ChessPosition(i, j));
                 if (tempPiece != null && tempPiece.getPieceType() == ChessPiece.PieceType.KING &&
-                    tempPiece.getTeamColor() == this.teamTurn) {
+                    tempPiece.getTeamColor() == teamColor) {
                     kingPosition = new ChessPosition(i, j);
                     break;
                 }
