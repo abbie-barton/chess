@@ -78,6 +78,10 @@ public class ChessGame {
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPiece currPiece = board.getPiece(move.getStartPosition());
 
+        if (currPiece == null) {
+            // no starting piece
+            throw new InvalidMoveException();
+        }
         if (currPiece.getTeamColor() != this.teamTurn) {
             // if the piece color is not this.teamTurn
             throw new InvalidMoveException();
@@ -105,6 +109,26 @@ public class ChessGame {
     public void checkMove(ChessMove move) throws InvalidMoveException {
         ChessPiece currPiece = board.getPiece(move.getStartPosition());
         ChessPiece therePiece = null;
+
+        if (move.getEndPosition().getColumn() > 8 || move.getEndPosition().getColumn() < 1 ||
+            move.getEndPosition().getRow() > 8 || move.getEndPosition().getRow() < 1) {
+            // end position is out of bounds
+            throw new InvalidMoveException();
+        }
+
+        // get possible moves & check if endPosition matches possible moves
+        Collection<ChessMove> possibleMoves = board.getPiece(move.getStartPosition()).pieceMoves(board, move.getStartPosition());
+        boolean valid = false;
+        for (ChessMove m : possibleMoves) {
+            if (move.getEndPosition().getRow() == m.getEndPosition().getRow() &&
+                move.getEndPosition().getColumn() == m.getEndPosition().getColumn()) {
+                valid = true;
+                break;
+            }
+        }
+        if (!valid) {
+            throw new InvalidMoveException();
+        }
 
         if (board.getPiece(move.getEndPosition()) != null) {
             // if there is a piece at end position, set therePiece to that piece
@@ -145,6 +169,10 @@ public class ChessGame {
     public boolean isInCheck(TeamColor teamColor) {
         // find the position of the king
         ChessPosition kingPosition = findKingPosition(teamColor);
+
+        if (kingPosition == null) {
+            return false;
+        }
 
         // find all the pieces on the opposite team
         for (int i = 1; i <= 8; i++) {
