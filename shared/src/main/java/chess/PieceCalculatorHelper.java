@@ -96,7 +96,8 @@ public class PieceCalculatorHelper {
         return moveList;
     }
 
-    private static void addMovesInDirection(Collection<ChessMove> moveList, ChessPosition myPosition, ChessBoard board, int rowIncrement, int colIncrement, boolean limited) {
+    private static void addMovesInDirection(Collection<ChessMove> moveList, ChessPosition myPosition, ChessBoard board,
+                                            int rowIncrement, int colIncrement, boolean limited) {
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
 

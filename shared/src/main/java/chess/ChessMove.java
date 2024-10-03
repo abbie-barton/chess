@@ -46,7 +46,8 @@ public class ChessMove {
 
     @Override
     public String toString() {
-        return "start: {" + startPosition.getRow() + ", " + startPosition.getColumn() + "}, end: {" + endPosition.getRow() + ", " + endPosition.getColumn() + "}";
+        return "start: {" + startPosition.getRow() + ", " + startPosition.getColumn() + "}, end: {"
+                + endPosition.getRow() + ", " + endPosition.getColumn() + "}";
     }
 
     @Override

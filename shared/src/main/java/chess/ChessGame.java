@@ -181,17 +181,25 @@ public class ChessGame {
                 if (tempPiece != null && tempPiece.getTeamColor() != teamColor) {
                     // call pieceMoves on each and see if the king is at the endPosition of the move
                     Collection<ChessMove> moves = tempPiece.pieceMoves(board, new ChessPosition(i, j));
-                    for (ChessMove move : moves) {
-                        // if king is at endPosition of the move, king is in check
-                        if (move.getEndPosition().getRow() == kingPosition.getRow() &&
-                            move.getEndPosition().getColumn() == kingPosition.getColumn()) {
-                            return true;
-                        }
+                    if (kingAtEndPosition(moves, kingPosition)) {
+                        return true;
                     }
                 }
             }
         }
 
+        return false;
+    }
+
+    public boolean kingAtEndPosition (Collection<ChessMove> moves, ChessPosition kingPosition) {
+        // call pieceMoves on each and see if the king is at the endPosition of the move
+        for (ChessMove move : moves) {
+            // if king is at endPosition of the move, king is in check
+            if (move.getEndPosition().getRow() == kingPosition.getRow() &&
+                    move.getEndPosition().getColumn() == kingPosition.getColumn()) {
+                return true;
+            }
+        }
         return false;
     }
 
