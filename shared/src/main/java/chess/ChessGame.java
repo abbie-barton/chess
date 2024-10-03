@@ -84,6 +84,12 @@ public class ChessGame {
             } else {
                 board.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
             }
+            // set team turn color
+            if (this.teamTurn == TeamColor.WHITE) {
+                this.teamTurn = TeamColor.BLACK;
+            } else {
+                this.teamTurn = TeamColor.WHITE;
+            }
         } catch (Exception InvalidMoveException) {
             throw new InvalidMoveException();
         }
@@ -151,8 +157,6 @@ public class ChessGame {
                     }
                 }
             }
-
-            return false;
         }
 
         return true;
@@ -168,6 +172,23 @@ public class ChessGame {
         // do any pieces have valid moves not just king
         ChessBoard tempBoard = board;
         ChessPosition kingPosition = findKingPosition(teamColor);
+
+        // get pieceMoves for every piece on the board of your team
+        // and then make the move on the tempBoard
+        // then check to see if, after making the move, king is still in check
+        // if the king is still in check for every move possibility, king is in checkmate
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                ChessPiece tempPiece = board.getPiece(new ChessPosition(i, j));
+                if (tempPiece != null && tempPiece.getTeamColor() == this.teamTurn) {
+                    // call pieceMoves on each and see if the king is at the endPosition of the move
+                    Collection<ChessMove> moves = tempPiece.pieceMoves(board, new ChessPosition(i, j));
+                    for (ChessMove move : moves) {
+
+                    }
+                }
+            }
+        }
 
         // go through the king's possible moves and see if they are in check or not
         if (kingPosition == null) {
