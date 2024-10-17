@@ -17,7 +17,6 @@ public class Service {
         } else {
             return dataAccess.createUser(newUser);
         }
-        return newUser;
     }
 
 
