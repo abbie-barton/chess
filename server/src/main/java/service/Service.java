@@ -13,9 +13,12 @@ public class Service {
 
     public UserData registerUser(UserData newUser) throws ServiceException {
         if (dataAccess.getUser(newUser.username()) != null) {
-            throw new ServiceException("User already exists")
+            throw new ServiceException("User already exists!");
+        } else {
+            return dataAccess.createUser(newUser);
         }
         return newUser;
     }
+
 
 }

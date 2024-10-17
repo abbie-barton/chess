@@ -2,10 +2,12 @@ package dataaccess;
 
 import model.*;
 
+import java.util.Collection;
+
 public interface DataAccess {
     UserData getUser(String userName);
 
-    UserData createUser(String userName, String password, String email);
+    UserData createUser(UserData newUser);
 
     GameData getGame(String gameID);
 
