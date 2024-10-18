@@ -44,6 +44,14 @@ public class Server {
         Spark.post("/game", this::createGame);
         Spark.exception(Exception.class, this::exceptionHandler);
 
+        // join game endpoint
+        Spark.put("/game", this::joinGame);
+        Spark.exception(Exception.class, this::exceptionHandler);
+
+        // clear endpoint
+        Spark.delete("/db", this::clear);
+        Spark.exception(Exception.class, this::exceptionHandler);
+
         //This line initializes the server and can be removed once you have a functioning endpoint 
         Spark.init();
 
@@ -82,6 +90,17 @@ public class Server {
         GameData game = serializer.fromJson(req.body(), GameData.class);
         GameData result = service.createGame(authInfo.authToken(), game.gameName());
         return serializer.toJson(result);
+    }
+
+    private String joinGame(Request req, Response res) throws Exception {
+        AuthData authInfo = serializer.fromJson((Reader) req.headers(), AuthData.class);
+        GameData game = serializer.fromJson(req.body(), GameData.class);
+        service.joinGame(authInfo.authToken(), game.playerColor(), game.gameID());
+        return serializer.toJson(200);
+    }
+
+    private void clear(Request req, Response res) throws Exception {
+        service.clear();
     }
 
     private void exceptionHandler(Exception ex, Request req, Response res) {

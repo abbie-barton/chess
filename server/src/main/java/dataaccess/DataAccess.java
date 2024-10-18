@@ -9,13 +9,13 @@ public interface DataAccess {
 
     UserData createUser(UserData newUser);
 
-    GameData getGame(String gameID);
+    GameData getGame(int gameID);
 
     GameData createGame(String gameName);
 
     Collection<GameData> listGames();
 
-    void updateGame(String gameID, String playerColor, String username);
+    void updateGame(int gameID, String playerColor, String username);
 
     AuthData createAuth(String username);
 

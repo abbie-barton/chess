@@ -9,7 +9,7 @@ public class MemoryDataAccess implements DataAccess {
     private int nextGameId = 1;
     final private Map<String, UserData> users = new HashMap<>();
     final private Map<String, AuthData> auth = new HashMap<>();
-    final private Map<String, GameData> games = new HashMap<>();
+    final private Map<Integer, GameData> games = new HashMap<>();
 
     @Override
     public UserData getUser(String userName) {
@@ -25,7 +25,7 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public GameData getGame(String gameID) {
+    public GameData getGame(int gameID) {
         return games.get(gameID);
     }
 
@@ -33,7 +33,7 @@ public class MemoryDataAccess implements DataAccess {
     public GameData createGame(String gameName) {
         GameData game = new GameData(nextGameId++, null, null, gameName, new ChessGame());
 
-        games.put(gameName, game);
+        games.put(nextGameId, game);
         return game;
     }
 
@@ -43,8 +43,14 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public void updateGame(String gameID, String playerColor, String username) {
+    public void updateGame(int gameID, String playerColor, String username) {
         // update game
+        GameData game = games.get(gameID);
+        if (Objects.equals(playerColor, "WHITE")) {
+            games.put(gameID, new GameData(gameID, username, game.blackUsername(), game.gameName(), game.game()));
+        } else {
+            games.put(gameID, new GameData(gameID, game.whiteUsername(), username, game.gameName(), game.game()));
+        }
     }
 
     @Override
@@ -59,7 +65,7 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public void deleteAuth(String authToken) {
-        // delete token
+        auth.remove(authToken);
     }
 
     @Override
