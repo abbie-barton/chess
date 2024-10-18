@@ -7,6 +7,7 @@ import service.ServiceException;
 import spark.*;
 import service.Service;
 
+import java.io.Reader;
 import java.util.Map;
 import java.util.Objects;
 
@@ -34,6 +35,10 @@ public class Server {
         Spark.delete("/session", this::logout);
         Spark.exception(Exception.class, this::exceptionHandler);
 
+        // list games endpoint
+        Spark.get("/game", this::listGames);
+        Spark.exception(Exception.class, this::exceptionHandler);
+
         //This line initializes the server and can be removed once you have a functioning endpoint 
         Spark.init();
 
@@ -54,16 +59,22 @@ public class Server {
     }
 
     private String logout(Request req, Response res) throws Exception {
-        AuthData authInfo = serializer.fromJson(req.body(), AuthData.class);
+        // where is the authToken coming from? should be in the headers but headers are empty
+        AuthData authInfo = serializer.fromJson((Reader) req.headers(), AuthData.class);
         service.logout(authInfo.authToken());
         // what do i do here
+        return serializer.toJson(200);
+    }
+
+    private String listGames(Request req, Response res) throws Exception {
+        AuthData authInfo = serializer.fromJson((Reader) req.headers(), AuthData.class);
+        service.listGames(authInfo.authToken());
         return serializer.toJson(200);
     }
 
     private void exceptionHandler(Exception ex, Request req, Response res) {
         // handle error codes
         if (ex instanceof ServiceException) {
-            System.out.println("service exception");
             if (Objects.equals(ex.getMessage(), "Error: already taken")) {
                 res.status(403);
             } else if (Objects.equals(ex.getMessage(), "Error: unauthorized")) {

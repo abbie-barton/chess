@@ -1,8 +1,10 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.DataAccess;
 import model.*;
 
+import java.util.Collection;
 import java.util.Objects;
 
 public class Service {
@@ -50,6 +52,18 @@ public class Service {
             throw new ServiceException("Error: unauthorized");
         } else {
             dataAccess.deleteAuth(authToken);
+        }
+    }
+
+    public Collection<GameData> listGames(String authToken) throws ServiceException {
+        if (authToken == null) {
+            throw new ServiceException("Error: bad request");
+        }
+        AuthData auth = dataAccess.getAuth(authToken);
+        if (auth == null) {
+            throw new ServiceException("Error: unauthorized");
+        } else {
+            return dataAccess.listGames();
         }
     }
 }
