@@ -3,10 +3,7 @@ package dataaccess;
 import chess.ChessGame;
 import model.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class MemoryDataAccess implements DataAccess {
     private int nextGameId = 1;
@@ -52,7 +49,7 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public AuthData createAuth(String username) {
-        return new AuthData("2sldkfj", username);
+        return new AuthData(UUID.randomUUID().toString(), username);
     }
 
     @Override

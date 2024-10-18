@@ -3,10 +3,12 @@ package server;
 import com.google.gson.Gson;
 import dataaccess.*;
 import model.*;
+import service.ServiceException;
 import spark.*;
 import service.Service;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class Server {
     private final DataAccess dataAccess = new MemoryDataAccess();
@@ -28,6 +30,10 @@ public class Server {
         Spark.post("/session", this::login);
         Spark.exception(Exception.class, this::exceptionHandler);
 
+        // logout endpoint
+        Spark.delete("/session", this::logout);
+        Spark.exception(Exception.class, this::exceptionHandler);
+
         //This line initializes the server and can be removed once you have a functioning endpoint 
         Spark.init();
 
@@ -47,9 +53,27 @@ public class Server {
         return serializer.toJson(result);
     }
 
+    private String logout(Request req, Response res) throws Exception {
+        AuthData authInfo = serializer.fromJson(req.body(), AuthData.class);
+        service.logout(authInfo.authToken());
+        // what do i do here
+        return serializer.toJson(200);
+    }
+
     private void exceptionHandler(Exception ex, Request req, Response res) {
-        // handle other error codes
-        res.status(500);
+        // handle error codes
+        if (ex instanceof ServiceException) {
+            System.out.println("service exception");
+            if (Objects.equals(ex.getMessage(), "Error: already taken")) {
+                res.status(403);
+            } else if (Objects.equals(ex.getMessage(), "Error: unauthorized")) {
+                res.status(401);
+            } else if (Objects.equals(ex.getMessage(), "Error: bad request")) {
+                res.status(400);
+            }
+        } else {
+            res.status(500);
+        }
         res.body(serializer.toJson(Map.of("message", ex.getMessage())));
         ex.printStackTrace(System.out);
     }
