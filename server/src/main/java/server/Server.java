@@ -8,6 +8,7 @@ import spark.*;
 import service.Service;
 
 import java.io.Reader;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 
@@ -39,6 +40,10 @@ public class Server {
         Spark.get("/game", this::listGames);
         Spark.exception(Exception.class, this::exceptionHandler);
 
+        // create game endpoint
+        Spark.post("/game", this::createGame);
+        Spark.exception(Exception.class, this::exceptionHandler);
+
         //This line initializes the server and can be removed once you have a functioning endpoint 
         Spark.init();
 
@@ -68,8 +73,15 @@ public class Server {
 
     private String listGames(Request req, Response res) throws Exception {
         AuthData authInfo = serializer.fromJson((Reader) req.headers(), AuthData.class);
-        service.listGames(authInfo.authToken());
-        return serializer.toJson(200);
+        Collection<GameData> result = service.listGames(authInfo.authToken());
+        return serializer.toJson(result);
+    }
+
+    private String createGame(Request req, Response res) throws Exception {
+        AuthData authInfo = serializer.fromJson((Reader) req.headers(), AuthData.class);
+        GameData game = serializer.fromJson(req.body(), GameData.class);
+        GameData result = service.createGame(authInfo.authToken(), game.gameName());
+        return serializer.toJson(result);
     }
 
     private void exceptionHandler(Exception ex, Request req, Response res) {

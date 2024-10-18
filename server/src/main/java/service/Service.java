@@ -66,4 +66,16 @@ public class Service {
             return dataAccess.listGames();
         }
     }
+
+    public GameData createGame(String authToken, String gameName) throws ServiceException {
+        if (gameName == null) {
+            throw new ServiceException("Error: bad request");
+        }
+        AuthData auth = dataAccess.getAuth(authToken);
+        if (auth == null) {
+            throw new ServiceException("Error: unauthorized");
+        } else {
+            return dataAccess.createGame(gameName);
+        }
+    }
 }
