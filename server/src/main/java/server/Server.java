@@ -73,10 +73,10 @@ public class Server {
 
     private String logout(Request req, Response res) throws Exception {
         // where is the authToken coming from? should be in the headers but headers are empty
-        AuthData authInfo = serializer.fromJson((Reader) req.headers(), AuthData.class);
-        service.logout(authInfo.authToken());
-        // what do i do here
-        return serializer.toJson(200);
+        String authToken = req.headers("authorization");
+        service.logout(authToken);
+        res.status(200);
+        return serializer.toJson(Map.of("message", "Success"));
     }
 
     private String listGames(Request req, Response res) throws Exception {
@@ -95,12 +95,15 @@ public class Server {
     private String joinGame(Request req, Response res) throws Exception {
         AuthData authInfo = serializer.fromJson((Reader) req.headers(), AuthData.class);
         GameData game = serializer.fromJson(req.body(), GameData.class);
-        service.joinGame(authInfo.authToken(), game.playerColor(), game.gameID());
-        return serializer.toJson(200);
+        //service.joinGame(authInfo.authToken(), game.playerColor(), game.gameID());
+        res.status(200);
+        return serializer.toJson(Map.of("message", "Success"));
     }
 
-    private void clear(Request req, Response res) throws Exception {
+    private String clear(Request req, Response res) throws Exception {
         service.clear();
+        res.status(200);
+        return serializer.toJson(Map.of("message", "Success"));
     }
 
     private void exceptionHandler(Exception ex, Request req, Response res) {
