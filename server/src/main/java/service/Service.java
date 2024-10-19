@@ -5,6 +5,8 @@ import dataaccess.DataAccess;
 import model.*;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class Service {
@@ -33,10 +35,10 @@ public class Service {
         }
         UserData user = dataAccess.getUser(username);
         if (user == null) {
-            throw new ServiceException("Error: User doesn't exist!");
+            throw new ServiceException("Error: unauthorized");
         } else {
             if (!Objects.equals(user.password(), password)) {
-                throw new ServiceException("Error: User doesn't exist!");
+                throw new ServiceException("Error: unauthorized");
             }
             return dataAccess.createAuth(username);
         }
@@ -54,7 +56,7 @@ public class Service {
         }
     }
 
-    public Collection<GameData> listGames(String authToken) throws ServiceException {
+    public Map<String, List<GameData>> listGames(String authToken) throws ServiceException {
         if (authToken == null) {
             throw new ServiceException("Error: bad request");
         }

@@ -9,6 +9,7 @@ import service.Service;
 
 import java.io.Reader;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -81,7 +82,7 @@ public class Server {
 
     private String listGames(Request req, Response res) throws Exception {
         String authToken = req.headers("authorization");
-        Collection<GameData> result = service.listGames(authToken);
+        Map<String, List<GameData>>  result = service.listGames(authToken);
         return serializer.toJson(result);
     }
 
@@ -115,6 +116,8 @@ public class Server {
                 res.status(401);
             } else if (Objects.equals(ex.getMessage(), "Error: bad request")) {
                 res.status(400);
+            } else {
+                res.status(500);
             }
         } else {
             res.status(500);

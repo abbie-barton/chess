@@ -38,8 +38,8 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public Collection<GameData> listGames() {
-        return new ArrayList<>(games.values());
+    public Map<String, List<GameData>> listGames() {
+        return Map.of("games", new ArrayList<>(games.values()));
     }
 
     @Override
