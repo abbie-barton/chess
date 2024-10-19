@@ -31,15 +31,15 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public GameData createGame(String gameName) {
-        GameData game = new GameData(nextGameId++, null, null, gameName, new ChessGame());
-
+        GameData game = new GameData(nextGameId, null, null, gameName, new ChessGame());
         games.put(nextGameId, game);
+        nextGameId++;
         return game;
     }
 
     @Override
     public Collection<GameData> listGames() {
-        return new ArrayList<>();
+        return new ArrayList<>(games.values());
     }
 
     @Override

@@ -61,7 +61,7 @@ public class Server {
 
     private String createUser(Request req, Response res) throws Exception {
         UserData newUser = serializer.fromJson(req.body(), UserData.class);
-        UserData result = service.registerUser(newUser);
+        AuthData result = service.registerUser(newUser);
         return serializer.toJson(result);
     }
 
@@ -80,22 +80,22 @@ public class Server {
     }
 
     private String listGames(Request req, Response res) throws Exception {
-        AuthData authInfo = serializer.fromJson((Reader) req.headers(), AuthData.class);
-        Collection<GameData> result = service.listGames(authInfo.authToken());
+        String authToken = req.headers("authorization");
+        Collection<GameData> result = service.listGames(authToken);
         return serializer.toJson(result);
     }
 
     private String createGame(Request req, Response res) throws Exception {
-        AuthData authInfo = serializer.fromJson((Reader) req.headers(), AuthData.class);
+        String authToken = req.headers("authorization");
         GameData game = serializer.fromJson(req.body(), GameData.class);
-        GameData result = service.createGame(authInfo.authToken(), game.gameName());
+        GameData result = service.createGame(authToken, game.gameName());
         return serializer.toJson(result);
     }
 
     private String joinGame(Request req, Response res) throws Exception {
-        AuthData authInfo = serializer.fromJson((Reader) req.headers(), AuthData.class);
-        GameData game = serializer.fromJson(req.body(), GameData.class);
-        //service.joinGame(authInfo.authToken(), game.playerColor(), game.gameID());
+        String authToken = req.headers("authorization");
+        JoinGameRequest game = serializer.fromJson(req.body(), JoinGameRequest.class);
+        service.joinGame(authToken, game.playerColor(), game.gameID());
         res.status(200);
         return serializer.toJson(Map.of("message", "Success"));
     }

@@ -15,7 +15,7 @@ public class Service {
         this.dataAccess = dataAccess;
     }
 
-    public UserData registerUser(UserData newUser) throws ServiceException {
+    public AuthData registerUser(UserData newUser) throws ServiceException {
         if (newUser.username() == null || newUser.password() == null || newUser.email() == null) {
             throw new ServiceException("Error: bad request");
         }
@@ -23,8 +23,7 @@ public class Service {
             throw new ServiceException("Error: already taken");
         } else {
             UserData user = dataAccess.createUser(newUser);
-            dataAccess.createAuth(user.username());
-            return user;
+            return dataAccess.createAuth(user.username());
         }
     }
 
@@ -37,7 +36,7 @@ public class Service {
             throw new ServiceException("Error: User doesn't exist!");
         } else {
             if (!Objects.equals(user.password(), password)) {
-                throw new ServiceException("Error: Password doesn't match!");
+                throw new ServiceException("Error: User doesn't exist!");
             }
             return dataAccess.createAuth(username);
         }
@@ -89,7 +88,7 @@ public class Service {
         } else {
             GameData game = dataAccess.getGame(gameID);
             if (game == null) {
-                throw new ServiceException("Error: unauthorized");
+                throw new ServiceException("Error: bad request");
             }
             if (game.blackUsername() != null && game.whiteUsername() != null) {
                 throw new ServiceException("Error: already taken");
