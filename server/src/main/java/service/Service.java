@@ -92,7 +92,9 @@ public class Service {
             if (game == null) {
                 throw new ServiceException("Error: bad request");
             }
-            if (game.blackUsername() != null && game.whiteUsername() != null) {
+            if (game.blackUsername() != null && game.whiteUsername() != null ||
+                    playerColor.equals("BLACK") && game.blackUsername() != null ||
+                    playerColor.equals("WHITE") && game.whiteUsername() != null) {
                 throw new ServiceException("Error: already taken");
             }
             dataAccess.updateGame(gameID, playerColor, auth.username());
