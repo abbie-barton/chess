@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class ServiceTests {
@@ -84,6 +86,29 @@ public class ServiceTests {
             Assertions.fail();
         } catch (Exception e) {
             Assertions.assertEquals(e.getMessage(), "Error: unauthorized");
+        }
+    }
+
+    @Test
+    public void positiveListGames() {
+        try {
+            UserData user = new UserData("hohoho", "merryChristmas", "");
+            AuthData registerResult = service.registerUser(user);
+            service.createGame(registerResult.authToken(), "game1");
+            Map<String, List<GameData>> games = service.listGames(registerResult.authToken());
+            Assertions.assertEquals(games, dataAccess.listGames());
+        } catch (Exception e) {
+            Assertions.fail();
+        }
+    }
+
+    @Test
+    public void negativeListGames() {
+        try {
+            service.listGames(null);
+            Assertions.fail();
+        } catch (Exception e) {
+            Assertions.assertEquals(e.getMessage(), "Error: bad request");
         }
     }
 }
