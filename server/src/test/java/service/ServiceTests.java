@@ -111,4 +111,27 @@ public class ServiceTests {
             Assertions.assertEquals(e.getMessage(), "Error: bad request");
         }
     }
+
+    @Test
+    public void positiveCreateGame() {
+        try {
+            UserData user = new UserData("programming", "camelCase", "");
+            AuthData registerResult = service.registerUser(user);
+            GameData game = service.createGame(registerResult.authToken(), "duck");
+            Assertions.assertNotNull(game);
+        } catch (Exception e) {
+            Assertions.fail();
+        }
+    }
+
+    @Test
+    public void negativeCreateGame() {
+        try {
+            UserData user = new UserData("programming", "camelCase", "");
+            AuthData registerResult = service.registerUser(user);
+            GameData game = service.createGame(registerResult.authToken(), null);
+        } catch (Exception e) {
+            Assertions.assertEquals(e.getMessage(), "Error: bad request");
+        }
+    }
 }
