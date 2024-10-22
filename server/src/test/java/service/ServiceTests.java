@@ -3,6 +3,7 @@ package service;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
 import model.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,15 @@ public class ServiceTests {
     public static void init() {
         dataAccess = new MemoryDataAccess();
         service = new Service(dataAccess);
+    }
+
+    @AfterEach
+    public void reset() {
+        try {
+            service.clear();
+        } catch (Exception e) {
+            Assertions.fail();
+        }
     }
 
     @Test
@@ -132,6 +142,67 @@ public class ServiceTests {
             GameData game = service.createGame(registerResult.authToken(), null);
         } catch (Exception e) {
             Assertions.assertEquals(e.getMessage(), "Error: bad request");
+        }
+    }
+
+    @Test
+    public void positiveJoinGame() {
+        try {
+            UserData user = new UserData("bob", "bob_party", "bob_party@yahoo.com");
+            AuthData registerResult = service.registerUser(user);
+            GameData game = service.createGame(registerResult.authToken(), "babushka");
+            service.joinGame(registerResult.authToken(), "WHITE", game.gameID());
+            GameData updatedGame = dataAccess.getGame(game.gameID());
+            Assertions.assertNotNull(updatedGame.whiteUsername());
+        } catch (Exception e) {
+            Assertions.fail();
+        }
+    }
+
+    @Test
+    public void negativeJoinGame() {
+        try {
+            UserData user = new UserData("bob", "bob_party", "bob_party@yahoo.com");
+            AuthData registerResult = service.registerUser(user);
+            GameData game = service.createGame(registerResult.authToken(), "babushka");
+            service.joinGame(registerResult.authToken(), "WHITE", game.gameID());
+
+            UserData secondUser = new UserData("bob_deepfake", "bob_deepfake_party", "bob@yahoo.com");
+            AuthData secondRegisterResult = service.registerUser(secondUser);
+            service.joinGame(secondRegisterResult.authToken(), "WHITE", game.gameID());
+            Assertions.fail();
+        } catch (Exception e) {
+            Assertions.assertEquals(e.getMessage(), "Error: already taken");
+        }
+    }
+
+    @Test
+    public void positiveClear() {
+        try {
+            UserData user = new UserData("cohesion", "frank", "");
+            AuthData registerResult = service.registerUser(user);
+            service.createGame(registerResult.authToken(), "myGame");
+            service.createGame(registerResult.authToken(), "nextGame");
+            service.clear();
+            Map<String, List<GameData>> games = dataAccess.listGames();
+            Assertions.assertEquals(games.get("games").size(), 0);
+        } catch (Exception e) {
+            Assertions.fail();
+        }
+    }
+
+    @Test
+    public void negativeClear() {
+        try {
+            UserData user = new UserData("cohesion", "frank", "");
+            AuthData registerResult = service.registerUser(user);
+            service.createGame(registerResult.authToken(), "myGame");
+            service.createGame(registerResult.authToken(), "nextGame");
+            service.clear();
+            service.listGames(registerResult.authToken());
+            Assertions.fail();
+        } catch (Exception e) {
+            Assertions.assertEquals(e.getMessage(), "Error: unauthorized");
         }
     }
 }
