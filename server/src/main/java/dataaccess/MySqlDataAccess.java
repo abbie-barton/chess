@@ -1,7 +1,9 @@
 package dataaccess;
 
 import chess.ChessGame;
+import com.google.gson.Gson;
 import model.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 import javax.xml.crypto.Data;
 import java.util.*;
@@ -22,12 +24,22 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public UserData getUser(String userName) {
-        return new UserData("", "", "");
+//        return new UserData("", "", "");
+        return null;
     }
 
     @Override
     public UserData createUser(UserData newUser) {
         UserData user = new UserData(newUser.username(), newUser.password(), newUser.email());
+        String hash = BCrypt.hashpw(newUser.password(), BCrypt.gensalt());
+        var statement = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
+        try {
+            var id = executeUpdate(statement, newUser.username(), hash, newUser.email());
+            System.out.printf("Created user with id %s%n", id);
+        } catch (Exception ex) {
+            System.out.println("Error creating user");
+            return null;
+        }
         return user;
     }
 
@@ -101,7 +113,7 @@ public class MySqlDataAccess implements DataAccess {
               `id` int NOT NULL AUTO_INCREMENT,
               `username` varchar(32) NOT NULL,
               `password` varchar(32) NOT NULL,
-              `email` varchar(32),
+              `email` varchar(32) NOT NULL,
               PRIMARY KEY (`id`),
               INDEX(username)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
