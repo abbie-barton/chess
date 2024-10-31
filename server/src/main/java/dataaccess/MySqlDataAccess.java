@@ -27,7 +27,8 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public UserData createUser(UserData newUser) {
-        return new UserData("", "", "");
+        UserData user = new UserData(newUser.username(), newUser.password(), newUser.email());
+        return user;
     }
 
     @Override
@@ -70,13 +71,37 @@ public class MySqlDataAccess implements DataAccess {
         System.out.println("Inside clear");
     }
 
+    private int executeUpdate(String statement, Object... params) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
+                for (var i = 0; i < params.length; i++) {
+                    var param = params[i];
+                    if (param instanceof String p) ps.setString(i + 1, p);
+                    else if (param instanceof Integer p) ps.setInt(i + 1, p);
+                    else if (param instanceof ChessGame p) ps.setString(i + 1, p.toString());
+                    else if (param == null) ps.setNull(i + 1, NULL);
+                }
+                ps.executeUpdate();
+
+                var rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+
+                return 0;
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format("unable to update database: %s, %s", statement, e.getMessage()));
+        }
+    }
+
     private final String[] createStatements = {
             """
             CREATE TABLE IF NOT EXISTS user (
               `id` int NOT NULL AUTO_INCREMENT,
-              `username` varchar(256) NOT NULL,
-              `password` varchar(256) NOT NULL,
-              `email` varchar(256),
+              `username` varchar(32) NOT NULL,
+              `password` varchar(32) NOT NULL,
+              `email` varchar(32),
               PRIMARY KEY (`id`),
               INDEX(username)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
@@ -85,7 +110,7 @@ public class MySqlDataAccess implements DataAccess {
             CREATE TABLE IF NOT EXISTS auth (
                 `id` int NOT NULL AUTO_INCREMENT,
                 `auth_token` varchar(256) NOT NULL,
-                `username` varchar(256) NOT NULL,
+                `username` varchar(32) NOT NULL,
                 PRIMARY KEY (`id`),
                 INDEX(auth_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
@@ -93,9 +118,9 @@ public class MySqlDataAccess implements DataAccess {
             """
             CREATE TABLE IF NOT EXISTS game (
                 `id` int NOT NULL AUTO_INCREMENT,
-                `white_username` varchar(256) NOT NULL,
-                `black_username` varchar(256) NOT NULL,
-                `game_name` varchar(256) NOT NULL,
+                `white_username` varchar(32) NOT NULL,
+                `black_username` varchar(32) NOT NULL,
+                `game_name` varchar(32) NOT NULL,
                 `game` varchar(1028) NOT NULL,
                 PRIMARY KEY (`id`),
                 INDEX(game_name)
