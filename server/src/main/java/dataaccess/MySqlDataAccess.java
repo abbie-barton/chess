@@ -65,7 +65,16 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public AuthData createAuth(String username) {
-        return new AuthData("", "");
+        AuthData newAuth = new AuthData(UUID.randomUUID().toString(), username);
+        var statement = "INSERT INTO auth (username, auth_token) VALUES (?, ?)";
+        try {
+            var id = executeUpdate(statement, newAuth.username(), newAuth.authToken());
+            System.out.printf("Created auth with id %s%n", id);
+        } catch (Exception ex) {
+            System.out.println("Error creating auth");
+            return null;
+        }
+        return newAuth;
     }
 
     @Override
