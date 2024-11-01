@@ -81,4 +81,27 @@ public class DatabaseTests {
         GameData gameResult = dataAccess.createGame(gameName);
         Assertions.assertNull(gameResult);
     }
+
+    @Test
+    public void positiveGetGame() {
+        UserData user = new UserData("bobothy", "keyboard", "hotdog@gmail.com");
+        UserData createResult = dataAccess.createUser(user);
+        AuthData authResult = dataAccess.createAuth(user.username());
+        String gameName = "dance party";
+        GameData createGameResult = dataAccess.createGame(gameName);
+        GameData getGameResult = dataAccess.getGame(createGameResult.gameID());
+        Assertions.assertEquals(createGameResult.gameName(), getGameResult.gameName());
+    }
+
+    @Test
+    public void negativeGetGame() {
+        UserData user = new UserData("bobothy", "keyboard", "hotdog@gmail.com");
+        UserData createResult = dataAccess.createUser(user);
+        AuthData authResult = dataAccess.createAuth(user.username());
+        String gameName = "dance party";
+        GameData createGameResult = dataAccess.createGame(gameName);
+        GameData getGameResult = dataAccess.getGame(createGameResult.gameID() + 1);
+        Assertions.assertNull(getGameResult);
+    }
+
 }
