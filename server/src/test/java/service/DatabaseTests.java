@@ -194,6 +194,21 @@ public class DatabaseTests {
         Assertions.assertNull(authResult);
     }
 
+    @Test
+    public void positiveGetAuth() {
+        UserData user = new UserData("Yoyoboy", "stringIn,stringOut", "YOyoy@gmail.com");
+        UserData createResult = dataAccess.createUser(user);
+        AuthData authResult = dataAccess.createAuth(user.username());
+        AuthData getAuthResult = dataAccess.getAuth(authResult.authToken());
+        Assertions.assertEquals(authResult, getAuthResult);
+    }
+
+    @Test
+    public void negativeGetAuth() {
+        AuthData getAuthResult = dataAccess.getAuth(null);
+        Assertions.assertNull(getAuthResult);
+    }
+
     private Connection configureDatabase() {
         try {
             try (var propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties")) {
