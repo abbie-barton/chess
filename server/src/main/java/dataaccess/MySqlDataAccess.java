@@ -114,7 +114,18 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public void updateGame(int gameID, String playerColor, String username) {
-        System.out.println("Inside updateGame");
+        try {
+            if (Objects.equals(playerColor, "WHITE")) {
+                var statement = "UPDATE game SET white_username = ? WHERE id = ?";
+                executeUpdate(statement, username, gameID);
+            } else {
+                var statement = "UPDATE game SET black_username = ? WHERE id = ?";
+                executeUpdate(statement, username, gameID);
+            }
+            System.out.printf("Updated game with id %s%n", gameID);
+        } catch (Exception ex) {
+            System.out.println("Error updating game");
+        }
     }
 
     @Override
