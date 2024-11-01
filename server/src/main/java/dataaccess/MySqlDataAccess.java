@@ -6,6 +6,7 @@ import model.*;
 import org.mindrot.jbcrypt.BCrypt;
 
 import javax.xml.crypto.Data;
+import java.sql.ResultSet;
 import java.util.*;
 
 import java.sql.SQLException;
@@ -24,7 +25,24 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public UserData getUser(String userName) {
-//        return new UserData("", "", "");
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT id, password, email FROM user WHERE username=?";
+            try (var rs = conn.prepareStatement(statement)) {
+                rs.setString(1, userName);
+                try (ResultSet resultSet = rs.executeQuery()) {
+                    if (resultSet.next()) {
+                        int id = resultSet.getInt("id");
+                        String password = resultSet.getString("password");
+                        String email = resultSet.getString("email");
+
+                        return new UserData(userName, password, email);
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            System.out.printf("Unable to read data: %s%n", ex.getMessage());
+            return null;
+        }
         return null;
     }
 
