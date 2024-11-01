@@ -1,8 +1,8 @@
-package service;
+package dataaccess;
 
-import dataaccess.*;
 import model.*;
 import org.junit.jupiter.api.*;
+import service.ServiceException;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -251,16 +251,16 @@ public class DatabaseTests {
             try (var propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties")) {
                 Properties props = new Properties();
                 props.load(propStream);
-                String DATABASE_NAME = props.getProperty("db.name");
-                String USER = props.getProperty("db.user");
-                String PASSWORD = props.getProperty("db.password");
+                String databaseName = props.getProperty("db.name");
+                String user = props.getProperty("db.user");
+                String password = props.getProperty("db.password");
 
                 var host = props.getProperty("db.host");
                 var port = Integer.parseInt(props.getProperty("db.port"));
-                String CONNECTION_URL = String.format("jdbc:mysql://%s:%d", host, port);
+                String connectionUrl = String.format("jdbc:mysql://%s:%d", host, port);
 
-                var conn = DriverManager.getConnection(CONNECTION_URL, USER, PASSWORD);
-                conn.setCatalog(DATABASE_NAME);
+                var conn = DriverManager.getConnection(connectionUrl, user, password);
+                conn.setCatalog(databaseName);
                 return conn;
             }
         } catch (Exception ex) {
