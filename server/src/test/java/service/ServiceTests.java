@@ -2,6 +2,7 @@ package service;
 
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
+import dataaccess.MySqlDataAccess;
 import model.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -18,7 +19,7 @@ public class ServiceTests {
 
     @BeforeAll
     public static void init() {
-        dataAccess = new MemoryDataAccess();
+        dataAccess = new MySqlDataAccess();
         service = new Service(dataAccess);
     }
 

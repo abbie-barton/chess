@@ -82,11 +82,12 @@ public class MySqlDataAccess implements DataAccess {
     @Override
     public GameData createGame(String gameName) {
         var statement = "INSERT INTO game (white_username, black_username, game_name, game) VALUES (?, ?, ?, ?)";
-        var json = new Gson().toJson(new ChessGame());
+        ChessGame newGame = new ChessGame();
+        var json = new Gson().toJson(newGame);
         try {
             var id = executeUpdate(statement, null, null, gameName, json);
             System.out.printf("Created game with id %s%n", id);
-            return new GameData(id, "", "", gameName, new ChessGame());
+            return new GameData(id, "", "", gameName, newGame);
         } catch (Exception ex) {
             System.out.println("Error creating game");
             return null;
