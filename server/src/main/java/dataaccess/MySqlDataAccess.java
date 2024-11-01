@@ -179,11 +179,11 @@ public class MySqlDataAccess implements DataAccess {
     @Override
     public void clear() {
         try {
-            var userStatement = "DELETE FROM user";
+            var userStatement = "TRUNCATE TABLE user";
             executeUpdate(userStatement);
-            var authStatement = "DELETE FROM auth";
+            var authStatement = "TRUNCATE TABLE auth";
             executeUpdate(authStatement);
-            var gameStatement = "DELETE FROM game";
+            var gameStatement = "TRUNCATE TABLE game";
             executeUpdate(gameStatement);
             System.out.println("Deleted user, auth, game tables");
         } catch (Exception ex) {
@@ -254,7 +254,7 @@ public class MySqlDataAccess implements DataAccess {
                 `game` varchar(2048) NOT NULL,
                 PRIMARY KEY (`id`),
                 INDEX(game_name)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=1
             """
     };
 

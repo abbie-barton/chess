@@ -38,11 +38,11 @@ public class Service {
         if (user == null) {
             throw new ServiceException("Error: unauthorized");
         } else {
-            String hash = BCrypt.hashpw(password, BCrypt.gensalt());
-            if (BCrypt.checkpw(user.password(), hash)) {
+            if (BCrypt.checkpw(password, user.password())) {
+                return dataAccess.createAuth(username);
+            } else {
                 throw new ServiceException("Error: unauthorized");
             }
-            return dataAccess.createAuth(username);
         }
     }
 
