@@ -68,7 +68,16 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public GameData createGame(String gameName) {
-        return new GameData(1, "", "", "", new ChessGame());
+        var statement = "INSERT INTO game (white_username, black_username, game_name, game) VALUES (?, ?, ?, ?)";
+        var json = new Gson().toJson(new ChessGame());
+        try {
+            var id = executeUpdate(statement, "", "", gameName, json);
+            System.out.printf("Created game with id %s%n", id);
+        } catch (Exception ex) {
+            System.out.println("Error creating game");
+            return null;
+        }
+        return new GameData(1, "", "", gameName, new ChessGame());
     }
 
     @Override
@@ -176,7 +185,7 @@ public class MySqlDataAccess implements DataAccess {
                 `white_username` varchar(32) NOT NULL,
                 `black_username` varchar(32) NOT NULL,
                 `game_name` varchar(32) NOT NULL,
-                `game` varchar(1028) NOT NULL,
+                `game` varchar(2048) NOT NULL,
                 PRIMARY KEY (`id`),
                 INDEX(game_name)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
