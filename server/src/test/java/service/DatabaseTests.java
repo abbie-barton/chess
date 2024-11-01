@@ -180,6 +180,20 @@ public class DatabaseTests {
         Assertions.assertNull(getGameResult);
     }
 
+    @Test
+    public void positiveCreateAuth() {
+        UserData user = new UserData("Stampy", "theElephant", "eleph.stampy@gmail.com");
+        UserData createResult = dataAccess.createUser(user);
+        AuthData authResult = dataAccess.createAuth(user.username());
+        Assertions.assertNotNull(authResult.authToken());
+    }
+
+    @Test
+    public void negativeCreateAuth() {
+        AuthData authResult = dataAccess.createAuth(null);
+        Assertions.assertNull(authResult);
+    }
+
     private Connection configureDatabase() {
         try {
             try (var propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties")) {
