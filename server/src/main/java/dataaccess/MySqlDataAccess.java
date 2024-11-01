@@ -102,7 +102,13 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public void deleteAuth(String authToken) {
-        System.out.println("Inside deleteAuth");
+        var statement = "DELETE FROM auth WHERE auth_token=?";
+        try {
+            executeUpdate(statement, authToken);
+            System.out.println("User logged out successfully");
+        } catch (Exception ex) {
+            System.out.println("Error logging out user");
+        }
     }
 
     @Override

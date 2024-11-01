@@ -2,6 +2,7 @@ package dataaccess;
 
 import chess.ChessGame;
 import model.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.*;
 
@@ -18,7 +19,8 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public UserData createUser(UserData newUser) {
-        UserData user = new UserData(newUser.username(), newUser.password(), newUser.email());
+        String hash = BCrypt.hashpw(newUser.password(), BCrypt.gensalt());
+        UserData user = new UserData(newUser.username(), hash, newUser.email());
 
         users.put(newUser.username(), user);
         return user;

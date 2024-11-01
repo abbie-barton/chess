@@ -3,6 +3,7 @@ package service;
 import chess.ChessGame;
 import dataaccess.DataAccess;
 import model.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.Collection;
 import java.util.List;
@@ -37,7 +38,8 @@ public class Service {
         if (user == null) {
             throw new ServiceException("Error: unauthorized");
         } else {
-            if (!Objects.equals(user.password(), password)) {
+            String hash = BCrypt.hashpw(password, BCrypt.gensalt());
+            if (BCrypt.checkpw(user.password(), hash)) {
                 throw new ServiceException("Error: unauthorized");
             }
             return dataAccess.createAuth(username);
