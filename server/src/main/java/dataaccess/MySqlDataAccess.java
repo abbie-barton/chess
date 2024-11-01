@@ -86,11 +86,11 @@ public class MySqlDataAccess implements DataAccess {
         try {
             var id = executeUpdate(statement, null, null, gameName, json);
             System.out.printf("Created game with id %s%n", id);
+            return new GameData(id, "", "", gameName, new ChessGame());
         } catch (Exception ex) {
             System.out.println("Error creating game");
             return null;
         }
-        return new GameData(1, "", "", gameName, new ChessGame());
     }
 
     @Override
