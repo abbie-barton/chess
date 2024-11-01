@@ -147,6 +147,39 @@ public class DatabaseTests {
         Assertions.assertNull(games);
     }
 
+    @Test
+    public void positiveUpdateGame() {
+        UserData user = new UserData("lotion", "smooth", "silky@yahoo.com");
+        UserData createResult = dataAccess.createUser(user);
+        AuthData authResult = dataAccess.createAuth(user.username());
+        GameData createGameResult = dataAccess.createGame("aloe");
+        dataAccess.updateGame(createGameResult.gameID(), "WHITE", createResult.username());
+        GameData getGameResult = dataAccess.getGame(createGameResult.gameID());
+        Assertions.assertNotEquals(createGameResult.whiteUsername(), getGameResult.whiteUsername());
+    }
+
+    @Test
+    public void negativeUpdateGame() {
+        UserData user = new UserData("lotion", "smooth", "silky@yahoo.com");
+        UserData createResult = dataAccess.createUser(user);
+        AuthData authResult = dataAccess.createAuth(user.username());
+        GameData createGameResult = dataAccess.createGame("aloe");
+
+        // drop table
+        try (var conn = configureDatabase()) {
+            var statement = "DROP TABLE game";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.executeUpdate();
+            }
+        } catch (Exception ex) {
+            Assertions.fail();
+        }
+
+        dataAccess.updateGame(createGameResult.gameID(), "WHITE", createResult.username());
+        GameData getGameResult = dataAccess.getGame(createGameResult.gameID());
+        Assertions.assertNull(getGameResult);
+    }
+
     private Connection configureDatabase() {
         try {
             try (var propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties")) {
