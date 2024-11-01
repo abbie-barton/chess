@@ -209,6 +209,52 @@ public class DatabaseTests {
         Assertions.assertNull(getAuthResult);
     }
 
+    @Test
+    public void positiveDeleteAuth() throws ServiceException {
+        UserData user = new UserData("AAAHH", "noChill", "typeA@gmail.com");
+        UserData createResult = dataAccess.createUser(user);
+        AuthData authResult = dataAccess.createAuth(createResult.username());
+        try {
+            dataAccess.deleteAuth(authResult.authToken());
+        } catch (Exception ex) {
+            throw new ServiceException("");
+        }
+        AuthData getAuthResult = dataAccess.getAuth(authResult.authToken());
+        Assertions.assertNull(getAuthResult);
+    }
+
+    @Test
+    public void negativeDeleteAuth() {
+        UserData user = new UserData("AAAHH", "noChill", "typeA@gmail.com");
+        UserData createResult = dataAccess.createUser(user);
+        AuthData authResult = dataAccess.createAuth(createResult.username());
+
+        // drop table
+        try (var conn = configureDatabase()) {
+            var statement = "DROP TABLE auth";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.executeUpdate();
+            }
+        } catch (Exception ex) {
+            Assertions.fail();
+        }
+
+        try {
+            dataAccess.deleteAuth(authResult.authToken());
+        } catch (Exception ex) {
+            Assertions.assertEquals(ex.getMessage(), "Error: bad request");
+        }
+    }
+
+    @Test
+    public void positiveClearDatabase() {
+        UserData user = new UserData("psohtse", "sdfklk", "zoi2fj@gmail.com");
+        UserData createResult = dataAccess.createUser(user);
+        dataAccess.clear();
+        UserData getResult = dataAccess.getUser(createResult.username());
+        Assertions.assertNull(getResult);
+    }
+
     private Connection configureDatabase() {
         try {
             try (var propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties")) {

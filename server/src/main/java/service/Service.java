@@ -54,7 +54,11 @@ public class Service {
         if (auth == null) {
             throw new ServiceException("Error: unauthorized");
         } else {
-            dataAccess.deleteAuth(authToken);
+            try {
+                dataAccess.deleteAuth(authToken);
+            } catch (Exception ex) {
+                throw new ServiceException("Error: bad request");
+            }
         }
     }
 

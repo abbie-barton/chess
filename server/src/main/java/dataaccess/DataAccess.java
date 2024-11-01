@@ -23,7 +23,7 @@ public interface DataAccess {
 
     AuthData getAuth(String authToken);
 
-    void deleteAuth(String authToken);
+    void deleteAuth(String authToken) throws DataAccessException;
 
     void clear();
 }

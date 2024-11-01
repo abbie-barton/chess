@@ -68,8 +68,12 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public void deleteAuth(String authToken) {
-        auth.remove(authToken);
+    public void deleteAuth(String authToken) throws DataAccessException {
+        try {
+            auth.remove(authToken);
+        } catch (Exception ex) {
+            throw new DataAccessException("Error: bad request");
+        }
     }
 
     @Override
