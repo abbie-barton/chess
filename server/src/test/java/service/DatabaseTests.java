@@ -1,13 +1,23 @@
 package service;
 
-import dataaccess.DataAccess;
-import dataaccess.MemoryDataAccess;
-import dataaccess.MySqlDataAccess;
+import dataaccess.*;
 import model.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
+
+import java.sql.SQLException;
+import java.util.Properties;
+
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
+import static java.sql.Types.NULL;
 
 public class DatabaseTests {
     static private DataAccess dataAccess;
@@ -104,4 +114,58 @@ public class DatabaseTests {
         Assertions.assertNull(getGameResult);
     }
 
+    @Test
+    public void positiveListGames() {
+        UserData user = new UserData("tim", "tim+britany", "britim@gmail.com");
+        UserData createResult = dataAccess.createUser(user);
+        AuthData authResult = dataAccess.createAuth(user.username());
+        GameData createGameResult = dataAccess.createGame("candle");
+        GameData createGameResult2 = dataAccess.createGame("wick");
+        Map<String, List<GameData>> games = dataAccess.listGames();
+        Assertions.assertEquals(games.get("games").getFirst().gameName(), createGameResult.gameName());
+    }
+
+    @Test
+    public void negativeListGames() {
+        UserData user = new UserData("tim", "tim+britany", "britim@gmail.com");
+        UserData createResult = dataAccess.createUser(user);
+        AuthData authResult = dataAccess.createAuth(user.username());
+        GameData createGameResult = dataAccess.createGame("candle");
+        GameData createGameResult2 = dataAccess.createGame("wick");
+
+        // drop table
+        try (var conn = configureDatabase()) {
+            var statement = "DROP TABLE game";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.executeUpdate();
+            }
+        } catch (Exception ex) {
+            Assertions.fail();
+        }
+
+        Map<String, List<GameData>> games = dataAccess.listGames();
+        Assertions.assertNull(games);
+    }
+
+    private Connection configureDatabase() {
+        try {
+            try (var propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties")) {
+                Properties props = new Properties();
+                props.load(propStream);
+                String DATABASE_NAME = props.getProperty("db.name");
+                String USER = props.getProperty("db.user");
+                String PASSWORD = props.getProperty("db.password");
+
+                var host = props.getProperty("db.host");
+                var port = Integer.parseInt(props.getProperty("db.port"));
+                String CONNECTION_URL = String.format("jdbc:mysql://%s:%d", host, port);
+
+                var conn = DriverManager.getConnection(CONNECTION_URL, USER, PASSWORD);
+                conn.setCatalog(DATABASE_NAME);
+                return conn;
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException("unable to process db.properties. " + ex.getMessage());
+        }
+    }
 }
