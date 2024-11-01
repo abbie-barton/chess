@@ -2,28 +2,19 @@ package service;
 
 import dataaccess.*;
 import model.*;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
-
-import java.sql.SQLException;
 import java.util.Properties;
-
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
-import static java.sql.Types.NULL;
 
 public class DatabaseTests {
     static private DataAccess dataAccess;
 
-    @BeforeAll
-    public static void init() {
+    @BeforeEach
+    public void init() {
         dataAccess = new MySqlDataAccess();
     }
 
