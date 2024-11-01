@@ -27,13 +27,13 @@ public class MySqlDataAccess implements DataAccess {
     public UserData getUser(String userName) {
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT id, password, email FROM user WHERE username=?";
-            try (var rs = conn.prepareStatement(statement)) {
-                rs.setString(1, userName);
-                try (ResultSet resultSet = rs.executeQuery()) {
-                    if (resultSet.next()) {
-                        int id = resultSet.getInt("id");
-                        String password = resultSet.getString("password");
-                        String email = resultSet.getString("email");
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setString(1, userName);
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        int id = rs.getInt("id");
+                        String password = rs.getString("password");
+                        String email = rs.getString("email");
 
                         return new UserData(userName, password, email);
                     }
@@ -63,7 +63,30 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public GameData getGame(int gameID) {
-        return new GameData(1, "", "", "", new ChessGame());
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT id, white_username, black_username, game_name, game FROM game WHERE id=?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, gameID);
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return readGame(rs);
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            System.out.printf("Unable to read data: %s%n", ex.getMessage());
+        }
+        return null;
+    }
+
+    public GameData readGame(ResultSet rs) throws SQLException {
+        int id = rs.getInt("id");
+        String whiteUsername = rs.getString("white_username");
+        String blackUsername = rs.getString("black_username");
+        String gameName = rs.getString("game_name");
+        String json = rs.getString("game");
+        ChessGame game = new Gson().fromJson(json, ChessGame.class);
+        return new GameData(id, whiteUsername, blackUsername, gameName, game);
     }
 
     @Override
@@ -71,7 +94,7 @@ public class MySqlDataAccess implements DataAccess {
         var statement = "INSERT INTO game (white_username, black_username, game_name, game) VALUES (?, ?, ?, ?)";
         var json = new Gson().toJson(new ChessGame());
         try {
-            var id = executeUpdate(statement, "", "", gameName, json);
+            var id = executeUpdate(statement, null, null, gameName, json);
             System.out.printf("Created game with id %s%n", id);
         } catch (Exception ex) {
             System.out.println("Error creating game");
@@ -110,10 +133,10 @@ public class MySqlDataAccess implements DataAccess {
             var statement = "SELECT id, username FROM auth WHERE auth_token=?";
             try (var ps = conn.prepareStatement(statement)) {
                 ps.setString(1, authToken);
-                try (ResultSet resultSet = ps.executeQuery()) {
-                    if (resultSet.next()) {
-                        int id = resultSet.getInt("id");
-                        String username = resultSet.getString("username");
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        int id = rs.getInt("id");
+                        String username = rs.getString("username");
                         System.out.printf("Got user with id %s%n", id);
 
                         return new AuthData(authToken, username);
