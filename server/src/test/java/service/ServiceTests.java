@@ -101,16 +101,12 @@ public class ServiceTests {
     }
 
     @Test
-    public void positiveListGames() {
-        try {
-            UserData user = new UserData("hohoho", "merryChristmas", "");
-            AuthData registerResult = service.registerUser(user);
-            service.createGame(registerResult.authToken(), "game1");
-            Map<String, List<GameData>> games = service.listGames(registerResult.authToken());
-            Assertions.assertEquals(games, dataAccess.listGames());
-        } catch (Exception e) {
-            Assertions.fail();
-        }
+    public void positiveListGames() throws ServiceException {
+        UserData user = new UserData("hohoho", "merryChristmas", "");
+        AuthData registerResult = service.registerUser(user);
+        service.createGame(registerResult.authToken(), "game1");
+        Map<String, List<GameData>> games = service.listGames(registerResult.authToken());
+        Assertions.assertEquals(games, dataAccess.listGames());
     }
 
     @Test

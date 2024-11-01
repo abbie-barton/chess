@@ -231,7 +231,7 @@ public class MySqlDataAccess implements DataAccess {
             CREATE TABLE IF NOT EXISTS user (
               `id` int NOT NULL AUTO_INCREMENT,
               `username` varchar(32) NOT NULL,
-              `password` varchar(32) NOT NULL,
+              `password` varchar(128) NOT NULL,
               `email` varchar(32) NOT NULL,
               PRIMARY KEY (`id`),
               INDEX(username)

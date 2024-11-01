@@ -42,4 +42,23 @@ public class DatabaseTests {
         UserData result = dataAccess.createUser(user);
         Assertions.assertNull(result);
     }
+
+    @Test
+    public void positiveGetUser() {
+        UserData user = new UserData("austin", "myGardenIsBeautiful", "gardenscapes@scapes.com");
+        UserData createResult = dataAccess.createUser(user);
+        UserData getResult = dataAccess.getUser(user.username());
+        if (getResult == null) {
+            Assertions.fail();
+        }
+        Assertions.assertEquals(getResult.email(), createResult.email());
+    }
+
+    @Test
+    public void negativeGetUser() {
+        UserData user = new UserData("austin", "myGardenIsBeautiful", "gardenscapes@scapes.com");
+        UserData createResult = dataAccess.createUser(user);
+        UserData getResult = dataAccess.getUser("auztin");
+        Assertions.assertNull(getResult);
+    }
 }
