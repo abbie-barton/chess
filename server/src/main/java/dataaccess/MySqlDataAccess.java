@@ -79,16 +79,6 @@ public class MySqlDataAccess implements DataAccess {
         return null;
     }
 
-    public GameData readGame(ResultSet rs) throws SQLException {
-        int id = rs.getInt("id");
-        String whiteUsername = rs.getString("white_username");
-        String blackUsername = rs.getString("black_username");
-        String gameName = rs.getString("game_name");
-        String json = rs.getString("game");
-        ChessGame game = new Gson().fromJson(json, ChessGame.class);
-        return new GameData(id, whiteUsername, blackUsername, gameName, game);
-    }
-
     @Override
     public GameData createGame(String gameName) {
         var statement = "INSERT INTO game (white_username, black_username, game_name, game) VALUES (?, ?, ?, ?)";
@@ -105,7 +95,21 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public Map<String, List<GameData>> listGames() {
-        return new HashMap<>();
+        List<GameData> result = new ArrayList<>();
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT id, white_username, black_username, game_name, game FROM game";
+            try (var ps = conn.prepareStatement(statement)) {
+                try (var rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        result.add(readGame(rs));
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            System.out.printf("Unable to read data: %s%n", ex.getMessage());
+            return null;
+        }
+        return Map.of("games", result);
     }
 
     @Override
@@ -176,6 +180,16 @@ public class MySqlDataAccess implements DataAccess {
         }
     }
 
+    public GameData readGame(ResultSet rs) throws SQLException {
+        int id = rs.getInt("id");
+        String whiteUsername = rs.getString("white_username");
+        String blackUsername = rs.getString("black_username");
+        String gameName = rs.getString("game_name");
+        String json = rs.getString("game");
+        ChessGame game = new Gson().fromJson(json, ChessGame.class);
+        return new GameData(id, whiteUsername, blackUsername, gameName, game);
+    }
+
     private int executeUpdate(String statement, Object... params) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
@@ -223,8 +237,8 @@ public class MySqlDataAccess implements DataAccess {
             """
             CREATE TABLE IF NOT EXISTS game (
                 `id` int NOT NULL AUTO_INCREMENT,
-                `white_username` varchar(32) NOT NULL,
-                `black_username` varchar(32) NOT NULL,
+                `white_username` varchar(32),
+                `black_username` varchar(32),
                 `game_name` varchar(32) NOT NULL,
                 `game` varchar(2048) NOT NULL,
                 PRIMARY KEY (`id`),
