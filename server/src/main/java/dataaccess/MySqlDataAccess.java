@@ -107,7 +107,17 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public void clear() {
-        System.out.println("Inside clear");
+        try {
+            var userStatement = "DELETE FROM user";
+            executeUpdate(userStatement);
+            var authStatement = "DELETE FROM auth";
+            executeUpdate(authStatement);
+            var gameStatement = "DELETE FROM game";
+            executeUpdate(gameStatement);
+            System.out.println("Deleted user, auth, game tables");
+        } catch (Exception ex) {
+            System.out.println("Error clearing database");
+        }
     }
 
     private int executeUpdate(String statement, Object... params) throws DataAccessException {
