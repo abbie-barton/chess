@@ -10,6 +10,8 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class ServerFacade {
@@ -19,9 +21,24 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    public UserData addUser(Pet pet) throws ResponseException {
-        var path = "/pet";
-        return this.makeRequest("POST", path, pet, Pet.class);
+    public UserData createUser(UserData newUser) throws ResponseException {
+        var path = "/user";
+        return this.makeRequest("POST", path, newUser, UserData.class);
+    }
+
+    public AuthData login(UserData user) throws ResponseException {
+        var path = "/session";
+        return this.makeRequest("POST", path, user, AuthData.class);
+    }
+
+    public void logout(String authToken) throws ResponseException {
+        var path = "/session";
+        this.makeRequest("DELETE", path, authToken, null);
+    }
+
+    public Map<String, List<GameData>> listGames(String authToken) throws ResponseException {
+        var path = "/game";
+        return this.makeRequest("GET", path, authToken, Map.class);
     }
 
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
