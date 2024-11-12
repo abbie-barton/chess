@@ -41,6 +41,21 @@ public class ServerFacade {
         return this.makeRequest("GET", path, authToken, Map.class);
     }
 
+    public GameData createGame(String authToken, String gameName) throws ResponseException {
+        var path = "/game";
+        return this.makeRequest("POST", path, gameName, GameData.class);
+    }
+
+    public void joinGame(String authToken, String playerColor, int gameID) throws ResponseException {
+        var path = "/game";
+        this.makeRequest("PUT", path, gameID, null);
+    }
+
+    public void clear() throws ResponseException {
+        var path = "/db";
+        this.makeRequest("DELETE", path, null, null);
+    }
+
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
@@ -88,6 +103,6 @@ public class ServerFacade {
     }
 
     private boolean isSuccessful(int status) {
-        return status / 100 == 2;
+        return status == 200;
     }
 }
