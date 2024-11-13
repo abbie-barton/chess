@@ -1,8 +1,11 @@
 package ui;
 
+import com.google.gson.Gson;
 import model.*;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 public class ChessClient {
     private final ServerFacade server;
@@ -22,11 +25,9 @@ public class ChessClient {
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "login" -> login(params);
-//                case "rescue" -> rescuePet(params);
-//                case "list" -> listPets();
-//                case "signout" -> signOut();
-//                case "adopt" -> adoptPet(params);
-//                case "adoptall" -> adoptAllPets();
+                case "register" -> register(params);
+                case "logout" -> logout(params);
+                case "list" -> listGames(params);
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -36,7 +37,7 @@ public class ChessClient {
     }
 
     public String login(String... params) throws ResponseException {
-        if (params.length >= 1) {
+        if (params.length >= 2) {
             state = State.LOGGED_IN;
             visitorName = String.join("-", params);
             UserData user = new UserData(params[0], params[1], null);
@@ -46,29 +47,62 @@ public class ChessClient {
         throw new ResponseException(400, "Expected: <yourname>");
     }
 
+    public String register(String... params) throws ResponseException {
+        if (params.length >= 3) {
+            state = State.LOGGED_IN;
+            UserData newUser = new UserData(params[0], params[1], params[2]);
+            UserData auth = server.createUser(newUser); // should be authData?
+            return String.format("You created user with username %s", auth.username());
+        }
+        throw new ResponseException(400, "Expected: <username> <password> <email>");
+    }
+
+    public String logout(String ...params) throws ResponseException {
+        assertSignedIn();
+        server.logout(params[0]);
+        state = State.LOGGED_OUT;
+        return String.format("%s logged out", visitorName);
+    }
+
+    public String listGames(String ...params) throws ResponseException {
+        assertSignedIn();
+        var games = server.listGames(params[0]);
+        var result = new StringBuilder();
+        var gson = new Gson();
+        for (List<GameData> gameList : games.values()) {
+            for (GameData game : gameList) {
+                result.append(gson.toJson(game)).append('\n');
+            }
+        }
+        return result.toString();
+    }
+
     public String help() {
         if (state == State.LOGGED_OUT) {
             return """
-                    register <USERNAME> <PASSWORD <EMAIL> - to create an account
-                    login <USERNAME> <PASSWORD> - to play chess
-                    quit - playing chess
-                    help - with possible commands
+                    
+                      register <USERNAME> <PASSWORD <EMAIL> - to create an account
+                      login <USERNAME> <PASSWORD> - to play chess
+                      quit - playing chess
+                      help - with possible commands
                     """;
         } else if (state == State.LOGGED_IN) {
             return """
-                   create <NAME> - a game
-                   list - games
-                   join <ID> [WHITE|BLACK] - a game
-                   observe <ID> - a game
-                   logout - when you are done
-                   quit - playing chess
-                   help - with possible commands
+                   
+                     create <NAME> - a game
+                     list - games
+                     join <ID> [WHITE|BLACK] - a game
+                     observe <ID> - a game
+                     logout - when you are done
+                     quit - playing chess
+                     help - with possible commands
                    """;
         }
         return """
-                redraw - board
-                quit - playing chess
-                help - with possible commands
+                
+                  redraw - board
+                  quit - playing chess
+                  help - with possible commands
                 """;
     }
 
