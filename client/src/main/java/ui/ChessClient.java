@@ -30,6 +30,8 @@ public class ChessClient {
                 case "logout" -> logout();
                 case "list" -> listGames();
                 case "create" -> createGame(params);
+                case "join" -> joinGame(params);
+                case "observe" -> observeGame(params);
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -88,6 +90,28 @@ public class ChessClient {
             return String.format("You created game with ID %d", game.gameID());
         }
         throw new ResponseException(400, "Expected: <gameName>");
+    }
+
+    public String joinGame(String... params) throws ResponseException {
+        assertSignedIn();
+        int gameID = Integer.parseInt(params[0]);
+        if (params.length >= 2) {
+            server.joinGame(this.authToken, params[1], gameID);
+            return String.format("You joined game with ID %d", gameID);
+        }
+        throw new ResponseException(400, "Expected: <gameID> [WHITE|BLACK]");
+    }
+
+    public String observeGame(String... params) throws ResponseException {
+        assertSignedIn();
+        int gameID = Integer.parseInt(params[1]);
+        return String.format("You are observing game with ID %d", gameID);
+    }
+
+    public String clear() throws ResponseException {
+        assertSignedIn();
+        server.clear();
+        return String.format("You successfully cleared the database.");
     }
 
     public String help() {
