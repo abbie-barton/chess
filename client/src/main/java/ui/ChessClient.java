@@ -28,6 +28,7 @@ public class ChessClient {
                 case "register" -> register(params);
                 case "logout" -> logout(params);
                 case "list" -> listGames(params);
+                case "create" -> createGame(params);
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -75,6 +76,15 @@ public class ChessClient {
             }
         }
         return result.toString();
+    }
+
+    public String createGame(String... params) throws ResponseException {
+        assertSignedIn();
+        if (params.length >= 2) {
+            GameData game = server.createGame(params[0], params[1]); // should be authData?
+            return String.format("You created game with ID %d", game.gameID());
+        }
+        throw new ResponseException(400, "Expected: <username> <password> <email>");
     }
 
     public String help() {
