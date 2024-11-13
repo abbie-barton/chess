@@ -21,9 +21,9 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    public UserData createUser(UserData newUser) throws ResponseException {
+    public AuthData createUser(UserData newUser) throws ResponseException {
         var path = "/user";
-        return this.makeRequest("POST", path, newUser, UserData.class, null);
+        return this.makeRequest("POST", path, newUser, AuthData.class, null);
     }
 
     public AuthData login(UserData user) throws ResponseException {
@@ -76,7 +76,7 @@ public class ServerFacade {
         if (request != null) {
             http.addRequestProperty("Content-Type", "application/json");
             if (authToken != null) {
-                http.addRequestProperty("authorization", authToken);
+                http.addRequestProperty("Authorization", authToken);
             }
             String reqData = new Gson().toJson(request);
             try (OutputStream reqBody = http.getOutputStream()) {
