@@ -1,11 +1,14 @@
 package ui;
 
+import model.*;
+
 import java.util.Arrays;
 
 public class ChessClient {
     private final ServerFacade server;
     private final String serverUrl;
     private State state = State.LOGGED_OUT;
+    private String visitorName = null;
 
     public ChessClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
@@ -18,7 +21,7 @@ public class ChessClient {
             var cmd = (tokens.length > 0) ? tokens[0] : "help";
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-//                case "signin" -> signIn(params);
+                case "login" -> login(params);
 //                case "rescue" -> rescuePet(params);
 //                case "list" -> listPets();
 //                case "signout" -> signOut();
@@ -30,6 +33,17 @@ public class ChessClient {
         } catch (ResponseException ex) {
             return ex.getMessage();
         }
+    }
+
+    public String login(String... params) throws ResponseException {
+        if (params.length >= 1) {
+            state = State.LOGGED_IN;
+            visitorName = String.join("-", params);
+            UserData user = new UserData(params[0], params[1], null);
+            server.login(user);
+            return String.format("You signed in as %s.", visitorName);
+        }
+        throw new ResponseException(400, "Expected: <yourname>");
     }
 
     public String help() {
