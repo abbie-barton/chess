@@ -41,9 +41,9 @@ public class ServerFacade {
         return this.makeRequest("GET", path, null, Map.class, authToken);
     }
 
-    public GameData createGame(String authToken, String gameName) throws ResponseException {
+    public GameData createGame(String authToken, GameData gameData) throws ResponseException {
         var path = "/game";
-        return this.makeRequest("POST", path, gameName, GameData.class, authToken);
+        return this.makeRequest("POST", path, gameData, GameData.class, authToken);
     }
 
     public void joinGame(String authToken, String playerColor, int gameID) throws ResponseException {

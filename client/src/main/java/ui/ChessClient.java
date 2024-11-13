@@ -1,5 +1,6 @@
 package ui;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import model.*;
 
@@ -86,7 +87,9 @@ public class ChessClient {
     public String createGame(String... params) throws ResponseException {
         assertSignedIn();
         if (params.length >= 1) {
-            GameData game = server.createGame(this.authToken, params[0]);
+            // 1 is a placeholder id, will get replaced
+            GameData newGame = new GameData(1, null, null, params[0], new ChessGame());
+            GameData game = server.createGame(this.authToken, newGame);
             return String.format("You created game with ID %d", game.gameID());
         }
         throw new ResponseException(400, "Expected: <gameName>");
