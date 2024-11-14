@@ -1,5 +1,9 @@
 package ui;
 
+import chess.ChessBoard;
+import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import model.GameData;
 
 import java.io.PrintStream;
@@ -23,7 +27,7 @@ public class DrawBoard {
 
         drawHeaders(out);
 
-        drawChessBoard(out);
+        drawChessBoard(out, game.game());
 
         out.print(SET_BG_COLOR_BLACK);
         out.print(SET_TEXT_COLOR_WHITE);
@@ -64,17 +68,15 @@ public class DrawBoard {
         setBlack(out);
     }
 
-    private static void drawChessBoard(PrintStream out) {
+    private static void drawChessBoard(PrintStream out, ChessGame game) {
         String[] rowLabels = { "8", "7", "6", "5", "4", "3", "2", "1" };
 
         for (int boardRow = 0; boardRow < BOARD_SIZE_IN_SQUARES; ++boardRow) {
-
-            drawRowOfSquares(out, rowLabels[boardRow]);
-
+            drawRowOfSquares(out, rowLabels[boardRow], game.getBoard());
         }
     }
 
-    private static void drawRowOfSquares(PrintStream out, String label) {
+    private static void drawRowOfSquares(PrintStream out, String label, ChessBoard board) {
         boolean setInitialDark = Integer.parseInt(label) % 2 == 1;
         for (int squareRow = 0; squareRow < SQUARE_SIZE_IN_PADDED_CHARS; ++squareRow) {
             if (squareRow == SQUARE_SIZE_IN_PADDED_CHARS / 2) {
@@ -94,7 +96,32 @@ public class DrawBoard {
                     int suffixLength = SQUARE_SIZE_IN_PADDED_CHARS - prefixLength - 1;
 
                     out.print(EMPTY.repeat(prefixLength));
-                    printPlayer(out, WHITE_KING);
+                    ChessPiece maybePiece = board.getPiece(new ChessPosition(Integer.parseInt(label), boardCol+1));
+                    if (maybePiece != null && maybePiece.getTeamColor() == ChessGame.TeamColor.BLACK) {
+                        String gamePiece = switch (maybePiece.getPieceType()) {
+                            case ChessPiece.PieceType.KING -> BLACK_KING;
+                            case ChessPiece.PieceType.QUEEN -> BLACK_QUEEN;
+                            case ChessPiece.PieceType.BISHOP -> BLACK_BISHOP;
+                            case ChessPiece.PieceType.ROOK -> BLACK_ROOK;
+                            case ChessPiece.PieceType.KNIGHT -> BLACK_KNIGHT;
+                            case ChessPiece.PieceType.PAWN -> BLACK_PAWN;
+                            default -> " ";
+                        };
+                        printPlayer(out, gamePiece);
+                    } else if (maybePiece != null && maybePiece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+                        String gamePiece = switch (maybePiece.getPieceType()) {
+                            case ChessPiece.PieceType.KING -> WHITE_KING;
+                            case ChessPiece.PieceType.QUEEN -> WHITE_QUEEN;
+                            case ChessPiece.PieceType.BISHOP -> WHITE_BISHOP;
+                            case ChessPiece.PieceType.ROOK -> WHITE_ROOK;
+                            case ChessPiece.PieceType.KNIGHT -> WHITE_KNIGHT;
+                            case ChessPiece.PieceType.PAWN -> WHITE_PAWN;
+                            default -> " ";
+                        };
+                        printPlayer(out, gamePiece);
+                    } else {
+                        printPlayer(out, "   ");
+                    }
                     out.print(EMPTY.repeat(suffixLength));
                 }
                 else {
