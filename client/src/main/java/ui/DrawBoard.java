@@ -83,12 +83,19 @@ public class DrawBoard {
         }
 
         for (int boardRow = 0; boardRow < BOARD_SIZE_IN_SQUARES; ++boardRow) {
-            drawRowOfSquares(out, rowLabels[boardRow], game.getBoard());
+            drawRowOfSquares(out, rowLabels[boardRow], game.getBoard(), whiteAtBottom);
         }
     }
 
-    private static void drawRowOfSquares(PrintStream out, String label, ChessBoard board) {
-        boolean setInitialDark = Integer.parseInt(label) % 2 == 1;
+    private static void drawRowOfSquares(PrintStream out, String label, ChessBoard board, boolean whiteAtBottom) {
+        boolean setInitialDark;
+        if (whiteAtBottom) {
+            setInitialDark = Integer.parseInt(label) % 2 == 0;
+        } else {
+            setInitialDark = Integer.parseInt(label) % 2 == 1;
+        }
+
+        int oppositeCounter = 8;
         for (int squareRow = 0; squareRow < SQUARE_SIZE_IN_PADDED_CHARS; ++squareRow) {
             if (squareRow == SQUARE_SIZE_IN_PADDED_CHARS / 2) {
                 printPlayer(out, "  " + label + "   ");
@@ -107,7 +114,14 @@ public class DrawBoard {
                     int suffixLength = SQUARE_SIZE_IN_PADDED_CHARS - prefixLength - 1;
 
                     out.print(EMPTY.repeat(prefixLength));
-                    ChessPiece maybePiece = board.getPiece(new ChessPosition(Integer.parseInt(label), boardCol+1));
+                    int useCol;
+                    if (whiteAtBottom) {
+                        useCol = boardCol+1;
+                    } else {
+                        useCol = oppositeCounter;
+                    }
+                    ChessPiece maybePiece = board.getPiece(new ChessPosition(Integer.parseInt(label), useCol));
+                    oppositeCounter--;
                     if (maybePiece != null && maybePiece.getTeamColor() == ChessGame.TeamColor.BLACK) {
                         String gamePiece = switch (maybePiece.getPieceType()) {
                             case ChessPiece.PieceType.KING -> BLACK_KING;
