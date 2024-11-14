@@ -1,13 +1,9 @@
 package ui;
 
 import chess.ChessGame;
-import com.google.gson.Gson;
-import com.google.protobuf.ServiceException;
 import model.*;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 import static ui.EscapeSequences.*;
 
