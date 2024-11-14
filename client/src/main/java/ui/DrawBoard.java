@@ -20,24 +20,30 @@ public class DrawBoard {
     // Padded characters.
     private static final String EMPTY = "   ";
 
-    public static void main(GameData game) {
+    public static void main(GameData game, boolean whiteAtBottom) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
 
         out.print(ERASE_SCREEN);
 
-        drawHeaders(out);
+        drawHeaders(out, whiteAtBottom);
 
-        drawChessBoard(out, game.game());
+        drawChessBoard(out, game.game(), whiteAtBottom);
+
+        drawHeaders(out, whiteAtBottom);
 
         out.print(SET_BG_COLOR_BLACK);
         out.print(SET_TEXT_COLOR_WHITE);
     }
 
-    private static void drawHeaders(PrintStream out) {
-
+    private static void drawHeaders(PrintStream out, boolean whiteAtBottom) {
         setBlack(out);
 
-        String[] headers = { " a ", " b ", " c ", " d ", " e ", " f ", " g ", " h " };
+        String[] headers;
+        if (whiteAtBottom) {
+            headers = new String[]{ " a ", " b ", " c ", " d ", " e ", " f ", " g ", " h " };
+        } else {
+            headers = new String[]{ " h ", " g ", " f ", " e ", " d ", " c ", " b ", " a "};
+        }
         out.print(EMPTY.repeat(2));
         for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) {
             drawHeader(out, headers[boardCol]);
@@ -68,8 +74,13 @@ public class DrawBoard {
         setBlack(out);
     }
 
-    private static void drawChessBoard(PrintStream out, ChessGame game) {
-        String[] rowLabels = { "8", "7", "6", "5", "4", "3", "2", "1" };
+    private static void drawChessBoard(PrintStream out, ChessGame game, boolean whiteAtBottom) {
+        String[] rowLabels;
+        if (whiteAtBottom) {
+            rowLabels = new String[]{"8", "7", "6", "5", "4", "3", "2", "1"};
+        } else {
+            rowLabels = new String[]{"1", "2", "3", "4", "5", "6", "7", "8"};
+        }
 
         for (int boardRow = 0; boardRow < BOARD_SIZE_IN_SQUARES; ++boardRow) {
             drawRowOfSquares(out, rowLabels[boardRow], game.getBoard());
@@ -129,6 +140,12 @@ public class DrawBoard {
                 }
 
                 setBlack(out);
+            }
+
+            if (squareRow == SQUARE_SIZE_IN_PADDED_CHARS / 2) {
+                printPlayer(out, "  " + label + "   ");
+            } else {
+                out.print(EMPTY.repeat(2));
             }
 
             out.println();

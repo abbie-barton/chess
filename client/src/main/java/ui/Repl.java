@@ -18,8 +18,6 @@ public class Repl {
         System.out.println(SET_TEXT_BOLD
                             + " ♔ Let's play chess! Sign in to start. ♔ ");
         System.out.print(client.help());
-        GameData testGame = new GameData(1, null, null, "testGame", new ChessGame());
-        drawBoard(testGame);
 
         Scanner scanner = new Scanner(System.in);
         var result = "";
@@ -42,7 +40,4 @@ public class Repl {
         System.out.print("\n" + SET_TEXT_BOLD + SET_TEXT_COLOR_BLUE + RESET_BG_COLOR + "[" + client.state + "] ");
     }
 
-    private void drawBoard(GameData game) {
-        DrawBoard.main(game);
-    }
 }

@@ -164,6 +164,8 @@ public class ChessClient {
     }
 
     private void drawBoard(GameData game) {
-        DrawBoard.main(game);
+        DrawBoard.main(game, true);
+        System.out.print("\n");
+        DrawBoard.main(game, false);
     }
 }
