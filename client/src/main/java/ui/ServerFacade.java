@@ -38,9 +38,9 @@ public class ServerFacade {
 
     public List<GameData> listGames(String authToken) throws ResponseException {
         var path = "/game";
-        record listGamesResponse(List<GameData> games) {
+        record ListGamesResponse(List<GameData> games) {
         }
-        var response = this.makeRequest("GET", path, null, listGamesResponse.class, authToken);
+        var response = this.makeRequest("GET", path, null, ListGamesResponse.class, authToken);
         return response.games();
     }
 
