@@ -122,16 +122,7 @@ public class DrawBoard {
                     }
                     ChessPiece maybePiece = board.getPiece(new ChessPosition(Integer.parseInt(label), useCol));
                     oppositeCounter--;
-                    boolean blackTeam = maybePiece.getTeamColor() == ChessGame.TeamColor.BLACK;
-                    String gamePiece = switch (maybePiece.getPieceType()) {
-                        case ChessPiece.PieceType.KING -> blackTeam ? BLACK_KING : WHITE_KING;
-                        case ChessPiece.PieceType.QUEEN -> blackTeam ? BLACK_QUEEN : WHITE_QUEEN;
-                        case ChessPiece.PieceType.BISHOP -> blackTeam ? BLACK_BISHOP : WHITE_BISHOP;
-                        case ChessPiece.PieceType.ROOK -> blackTeam ? BLACK_ROOK : WHITE_ROOK;
-                        case ChessPiece.PieceType.KNIGHT -> blackTeam ? BLACK_KNIGHT : WHITE_KNIGHT;
-                        case ChessPiece.PieceType.PAWN -> blackTeam ? BLACK_PAWN : WHITE_PAWN;
-                        case null -> "   ";
-                    };
+                    String gamePiece = getPieceString(maybePiece);
                     printPlayer(out, gamePiece);
                     out.print(EMPTY.repeat(suffixLength));
                 }
@@ -150,6 +141,22 @@ public class DrawBoard {
 
             out.println();
         }
+    }
+
+    private static String getPieceString(ChessPiece maybePiece) {
+        if (maybePiece == null) {
+            return "   ";
+        }
+        boolean blackTeam = maybePiece.getTeamColor() == ChessGame.TeamColor.BLACK;
+        return switch (maybePiece.getPieceType()) {
+            case ChessPiece.PieceType.KING -> blackTeam ? BLACK_KING : WHITE_KING;
+            case ChessPiece.PieceType.QUEEN -> blackTeam ? BLACK_QUEEN : WHITE_QUEEN;
+            case ChessPiece.PieceType.BISHOP -> blackTeam ? BLACK_BISHOP : WHITE_BISHOP;
+            case ChessPiece.PieceType.ROOK -> blackTeam ? BLACK_ROOK : WHITE_ROOK;
+            case ChessPiece.PieceType.KNIGHT -> blackTeam ? BLACK_KNIGHT : WHITE_KNIGHT;
+            case ChessPiece.PieceType.PAWN -> blackTeam ? BLACK_PAWN : WHITE_PAWN;
+            case null -> "   ";
+        };
     }
 
     private static void setDarkBrown(PrintStream out) {
