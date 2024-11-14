@@ -81,10 +81,8 @@ public class ChessClient {
             return "No games have been created.";
         }
         StringBuilder returnString = new StringBuilder();
-        var gson = new Gson();
         returnString.append(" ID | Game Name \n");
         for (GameData game : games) {
-//            result.append(gson.toJson(game)).append('\n');
             returnString.append("  ").append(game.gameID()).append(" - ").append(game.gameName()).append("\n");
         }
         return returnString.toString();
@@ -110,7 +108,8 @@ public class ChessClient {
             } catch (Exception ex) {
                 return String.format(ex.getMessage());
             }
-
+            GameData testGame = new GameData(1, null, null, "testGame", new ChessGame());
+            this.drawBoard(testGame);
             this.state = State.IN_GAME;
             return String.format("You joined game with ID %d", gameID);
         }
@@ -162,5 +161,9 @@ public class ChessClient {
         if (state == State.LOGGED_OUT) {
             throw new ResponseException(400, "You must sign in");
         }
+    }
+
+    private void drawBoard(GameData game) {
+        DrawBoard.main(game);
     }
 }
