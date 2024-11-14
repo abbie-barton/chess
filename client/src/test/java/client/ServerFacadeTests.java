@@ -139,4 +139,58 @@ public class ServerFacadeTests {
         }
     }
 
+    @Test
+    public void positiveCreateGame() {
+        UserData newUser = new UserData("f", "f", "f");
+        try {
+            AuthData loginAuth = serverFacade.createUser(newUser);
+            GameData newGame = new GameData(1, null, null, "newGame", new ChessGame());
+            GameData game = serverFacade.createGame(loginAuth.authToken(), newGame);
+            Assertions.assertNotNull(game);
+        } catch (Exception ex) {
+            Assertions.fail();
+        }
+    }
+
+    @Test
+    public void negativeCreateGame() {
+        try {
+            GameData newGame = new GameData(1, null, null, "newGame", new ChessGame());
+            GameData game = serverFacade.createGame("fake auth token", newGame);
+            Assertions.fail();
+        } catch (Exception ex) {
+            Assertions.assertNotNull(ex);
+        }
+    }
+
+    @Test
+    public void positiveJoinGame() {
+        UserData newUser = new UserData("g", "g", "g");
+        try {
+            AuthData loginAuth = serverFacade.createUser(newUser);
+            GameData newGame = new GameData(1, null, null, "newGame", new ChessGame());
+            GameData game = serverFacade.createGame(loginAuth.authToken(), newGame);
+            serverFacade.joinGame(loginAuth.authToken(), "WHITE", game.gameID());
+            GameData gotGame = dataAccess.getGame(game.gameID());
+            Assertions.assertNotNull(gotGame.whiteUsername());
+        } catch (Exception ex) {
+            Assertions.fail();
+        }
+    }
+
+    @Test
+    public void negativeJoinGame() {
+        UserData newUser = new UserData("g", "g", "g");
+        try {
+            AuthData loginAuth = serverFacade.createUser(newUser);
+            GameData newGame = new GameData(1, null, null, "newGame", new ChessGame());
+            GameData game = serverFacade.createGame(loginAuth.authToken(), newGame);
+            serverFacade.joinGame(loginAuth.authToken(), "WHITE", game.gameID());
+            serverFacade.joinGame(loginAuth.authToken(), "WHITE", game.gameID());
+            Assertions.fail();
+        } catch (Exception ex) {
+            Assertions.assertNotNull(ex);
+        }
+    }
+
 }
