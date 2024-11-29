@@ -13,6 +13,7 @@ public class ChessClient {
     public State state = State.LOGGED_OUT;
     private String visitorName = null;
     private String authToken = null;
+    private Integer numGames = 0;
 
     public ChessClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
@@ -32,6 +33,7 @@ public class ChessClient {
                 case "create" -> createGame(params);
                 case "join" -> joinGame(params);
                 case "observe" -> observeGame(params);
+                case "leave" -> changeLoginState();
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -57,6 +59,7 @@ public class ChessClient {
             state = State.LOGGED_IN;
             UserData newUser = new UserData(params[0], params[1], params[2]);
             AuthData auth = server.createUser(newUser);
+            visitorName = params[0];
             this.authToken = auth.authToken();
             return String.format("You created user with username %s", params[1]);
         }
@@ -77,9 +80,12 @@ public class ChessClient {
             return "No games have been created.";
         }
         StringBuilder returnString = new StringBuilder();
-        returnString.append(" ID | Game Name \n");
+        returnString.append(" ID | Game Name | White Username | Black Username \n");
+
         for (GameData game : games) {
-            returnString.append("  ").append(game.gameID()).append(" - ").append(game.gameName()).append("\n");
+            returnString.append("  ").append(game.gameID()).append(" - ").append(game.gameName()).append(" - ")
+                    .append(game.whiteUsername()).append(" - ").append(game.blackUsername()).append("\n");
+            numGames++;
         }
         return returnString.toString();
     }
@@ -97,7 +103,12 @@ public class ChessClient {
 
     public String joinGame(String... params) throws ResponseException {
         assertSignedIn();
-        int gameID = Integer.parseInt(params[0]);
+        int gameID;
+        try {
+            gameID = Integer.parseInt(params[0]);
+        } catch (NumberFormatException ex) {
+            throw new ResponseException(400, "Expected: <gameID> [WHITE|BLACK]");
+        }
         if (params.length >= 2) {
             try {
                 server.joinGame(this.authToken, params[1].toUpperCase(), gameID);
@@ -114,7 +125,13 @@ public class ChessClient {
 
     public String observeGame(String... params) throws ResponseException {
         assertSignedIn();
-        int gameID = Integer.parseInt(params[1]);
+        int gameID = Integer.parseInt(params[0]);
+        if (gameID <= 0 || gameID > numGames) {
+            return String.format("That game ID does not exist");
+        } else {
+            GameData game = new GameData(gameID, null, null, "", new ChessGame());
+            drawBoard(game);
+        }
         return String.format("You are observing game with ID %d", gameID);
     }
 
@@ -148,9 +165,14 @@ public class ChessClient {
         return SET_TEXT_BOLD + SET_TEXT_COLOR_LIGHT_GREY + """
                 
                     redraw - board
-                    quit - playing chess
+                    leave - the chess game
                     help - with possible commands
                 """;
+    }
+
+    private String changeLoginState() {
+        state = State.LOGGED_IN;
+        return String.format("You left the chess game.");
     }
 
     private void assertSignedIn() throws ResponseException {
