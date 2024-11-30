@@ -43,7 +43,7 @@ public class Repl implements NotificationHandler {
     }
 
     public void notify(ServerMessage notification) {
-        System.out.println("       " + SET_TEXT_COLOR_WHITE + notification.getMessage());
+        System.out.println("\n       " + SET_TEXT_COLOR_WHITE + notification.getMessage());
         printPrompt();
     }
 

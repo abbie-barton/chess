@@ -1,5 +1,6 @@
 package websocket.messages;
 
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -12,6 +13,7 @@ public class ServerMessage {
     ServerMessageType serverMessageType;
     String message = "default message";
     String visitorName;
+    String fields = ""; //json string representation of fields
 
     public enum ServerMessageType {
         LOAD_GAME,
@@ -22,6 +24,13 @@ public class ServerMessage {
     public ServerMessage(String visitorName, ServerMessageType type) {
         this.serverMessageType = type;
         this.visitorName = visitorName;
+    }
+
+    public ServerMessage(String visitorName, ServerMessageType type, String fields, String message) {
+        this.serverMessageType = type;
+        this.visitorName = visitorName;
+        this.fields = fields;
+        this.message = message;
     }
 
     public ServerMessageType getServerMessageType() {
@@ -42,6 +51,14 @@ public class ServerMessage {
 
     public String getVisitorName() {
         return this.visitorName;
+    }
+
+    public void setJsonFields(String fields) {
+        this.fields = fields;
+    }
+
+    public String getJsonFields() {
+        return this.fields;
     }
 
     @Override

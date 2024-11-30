@@ -7,6 +7,7 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
+import java.util.Map;
 
 @WebSocket
 public class WebSocketHandler {
@@ -25,8 +26,9 @@ public class WebSocketHandler {
     private void notification(String visitorName, Session session) throws IOException {
         connections.add(visitorName, session);
         String message = String.format("%s, this is a test notification!", visitorName);
-        ServerMessage notification = new ServerMessage(visitorName, ServerMessage.ServerMessageType.NOTIFICATION);
-        notification.setMessage(message);
+        Map<String, String> fields = Map.of("message", message);
+        var json = new Gson().toJson(fields);
+        ServerMessage notification = new ServerMessage(visitorName, ServerMessage.ServerMessageType.NOTIFICATION, json, message);
         connections.broadcast(visitorName, notification);
     }
 
