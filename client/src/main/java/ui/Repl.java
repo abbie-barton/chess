@@ -2,16 +2,18 @@ package ui;
 
 import chess.ChessGame;
 import model.GameData;
+import ui.websocket.NotificationHandler;
+import websocket.messages.ServerMessage;
 
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
 
-public class Repl {
+public class Repl implements NotificationHandler {
     private final ChessClient client;
 
     public Repl(String serverUrl) {
-        client = new ChessClient(serverUrl);
+        client = new ChessClient(serverUrl, this);
     }
 
     public void run() {
@@ -38,6 +40,11 @@ public class Repl {
 
     private void printPrompt() {
         System.out.print("\n" + SET_TEXT_BOLD + SET_TEXT_COLOR_BLUE + RESET_BG_COLOR + "[" + client.state + "] ");
+    }
+
+    public void notify(ServerMessage notification) {
+        System.out.println("       " + SET_TEXT_COLOR_WHITE + notification.getMessage());
+        printPrompt();
     }
 
 }

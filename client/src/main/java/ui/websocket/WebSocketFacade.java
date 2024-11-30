@@ -15,9 +15,11 @@ import java.net.URISyntaxException;
 public class WebSocketFacade extends Endpoint {
     Session session;
     NotificationHandler notificationHandler;
+    String visitorName = "";
 
-    public WebSocketFacade(String url, NotificationHandler notificationHandler) throws ResponseException {
+    public WebSocketFacade(String url, NotificationHandler notificationHandler, String visitorName) throws ResponseException {
         try {
+            this.visitorName = visitorName;
             url = url.replace("http", "ws");
             URI socketURI = new URI(url + "/ws");
             this.notificationHandler = notificationHandler;
@@ -29,7 +31,7 @@ public class WebSocketFacade extends Endpoint {
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
-                    ServerMessageType notification = new Gson().fromJson(message, ServerMessageType.class);
+                    ServerMessage notification = new Gson().fromJson(message, ServerMessage.class);
                     notificationHandler.notify(notification);
                 }
             });
@@ -45,7 +47,7 @@ public class WebSocketFacade extends Endpoint {
 
     public void sendMessage(String visitorName) throws ResponseException {
         try {
-            var action = new ServerMessage(ServerMessageType.NOTIFICATION);
+            var action = new ServerMessage(visitorName, ServerMessageType.NOTIFICATION);
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (IOException ex) {
             throw new ResponseException(500, ex.getMessage());

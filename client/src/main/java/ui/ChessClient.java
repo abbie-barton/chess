@@ -2,6 +2,8 @@ package ui;
 
 import chess.ChessGame;
 import model.*;
+import ui.websocket.WebSocketFacade;
+import ui.websocket.NotificationHandler;
 
 import java.util.Arrays;
 
@@ -10,14 +12,18 @@ import static ui.EscapeSequences.*;
 public class ChessClient {
     private final ServerFacade server;
     private final String serverUrl;
+    private final NotificationHandler notificationHandler;
+    private WebSocketFacade ws;
     public State state = State.LOGGED_OUT;
     private String visitorName = null;
     private String authToken = null;
     private Integer numGames = 0;
 
-    public ChessClient(String serverUrl) {
+    public ChessClient(String serverUrl, NotificationHandler notificationHandler) {
         server = new ServerFacade(serverUrl);
         this.serverUrl = serverUrl;
+        this.notificationHandler = notificationHandler;
+
     }
 
     public String eval(String input) {
@@ -61,6 +67,8 @@ public class ChessClient {
             AuthData auth = server.createUser(newUser);
             visitorName = params[0];
             this.authToken = auth.authToken();
+            ws = new WebSocketFacade(serverUrl, notificationHandler, visitorName);
+            ws.sendMessage(visitorName);
             return String.format("You created user with username %s", params[1]);
         }
         throw new ResponseException(400, "Expected: <username> <password> <email>");

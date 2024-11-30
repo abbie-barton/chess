@@ -3,6 +3,7 @@ package server;
 import com.google.gson.Gson;
 import dataaccess.*;
 import model.*;
+import server.websocket.WebSocketHandler;
 import service.ServiceException;
 import spark.*;
 import service.Service;
@@ -17,13 +18,14 @@ public class Server {
     private final DataAccess dataAccess = new MySqlDataAccess();
     private final Service service = new Service(dataAccess);
     private final Gson serializer = new Gson();
+    private final WebSocketHandler webSocketHandler = new WebSocketHandler();
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
 
-        // Register your endpoints and handle exceptions here.
+        Spark.webSocket("/ws", webSocketHandler);
 
         // register endpoint
         Spark.post("/user", this::createUser);
@@ -63,6 +65,7 @@ public class Server {
     private String createUser(Request req, Response res) throws Exception {
         UserData newUser = serializer.fromJson(req.body(), UserData.class);
         AuthData result = service.registerUser(newUser);
+        webSocketHandler.testBroadcast();
         return serializer.toJson(result);
     }
 
