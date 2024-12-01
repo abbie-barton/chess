@@ -55,6 +55,10 @@ public class MemoryDataAccess implements DataAccess {
         }
     }
 
+    public void updateGameMoves(int gameID, String playerColor, GameData newGame) {
+        // update game moves here
+    }
+
     @Override
     public AuthData createAuth(String username) {
         AuthData newAuth = new AuthData(UUID.randomUUID().toString(), username);

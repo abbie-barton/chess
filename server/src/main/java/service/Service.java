@@ -124,4 +124,9 @@ public class Service {
     public GameData getGame(Integer gameID) {
         return dataAccess.getGame(gameID);
     }
+
+    public void removeGamePlayer(Integer gameID, String colorToRemove) {
+        // replace color username with null
+        dataAccess.updateGame(gameID, colorToRemove, null);
+    }
 }

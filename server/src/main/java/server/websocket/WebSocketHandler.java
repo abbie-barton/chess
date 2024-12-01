@@ -36,7 +36,7 @@ public class WebSocketHandler {
                 case CONNECT -> connect(action.getVisitorName(), action.getAuthToken(),
                         action.getGameID(), action.getVisitorColor(), session);
                 // case MAKE_MOVE ->
-                // case LEAVE ->
+                case LEAVE -> leave(username, action.getGameID(), action.getVisitorColor(), session);
                 // case RESIGN ->
             }
         } catch (UnauthorizedException ex) {
@@ -76,6 +76,25 @@ public class WebSocketHandler {
         }
     }
 
+    private void leave(String visitorName, int gameID, String color, Session session) throws IOException {
+        try {
+            connections.remove(visitorName);
+            removeGamePlayer(gameID, color.toUpperCase());
+            String message = String.format("You left game %s!", gameID);
+            Map<String, Object> fields = Map.of("message", message, "visitorName", visitorName, "gameID", gameID,
+                    "serverMessageType", ServerMessage.ServerMessageType.NOTIFICATION);
+            var json = new Gson().toJson(fields);
+            ServerMessage notification = new ServerMessage(visitorName,
+                    ServerMessage.ServerMessageType.NOTIFICATION, json, message, null);
+            connections.alertRoot(visitorName, notification);
+
+            String notifyMessage = String.format("%s left the game.", visitorName);
+            this.notification(visitorName, gameID, notifyMessage);
+        } catch (Exception ex) {
+            error(visitorName, "Error: " + ex.getMessage());
+        }
+    }
+
     private void notification(String visitorName, Integer gameID, String message) throws IOException {
         Map<String, Object> fields = Map.of("message", message, "visitorName", visitorName, "gameID", gameID,
                 "serverMessageType", ServerMessage.ServerMessageType.NOTIFICATION);
@@ -103,12 +122,25 @@ public class WebSocketHandler {
         }
     }
 
-    private GameData getGame(Integer gameID) throws Exception {
+    private GameData getGame(int gameID) throws Exception {
         var game = service.getGame(gameID);
         if (game == null) {
             throw new ServiceException("Error: Game does not exist");
         } else {
             return game;
+        }
+    }
+
+    private void removeGamePlayer(int gameID, String colorToRemove) throws Exception {
+        var game = service.getGame(gameID);
+        if (game == null) {
+            throw new ServiceException("Error: Game does not exist");
+        } else {
+            try {
+                service.removeGamePlayer(gameID, colorToRemove);
+            } catch (Exception ex) {
+                throw new ServiceException("Error: " + ex.getMessage());
+            }
         }
     }
 
