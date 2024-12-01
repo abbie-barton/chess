@@ -4,6 +4,7 @@ import chess.ChessGame;
 import model.*;
 import ui.websocket.WebSocketFacade;
 import ui.websocket.NotificationHandler;
+import websocket.commands.UserGameCommand;
 
 import java.util.Arrays;
 
@@ -67,8 +68,6 @@ public class ChessClient {
             AuthData auth = server.createUser(newUser);
             visitorName = params[0];
             this.authToken = auth.authToken();
-            ws = new WebSocketFacade(serverUrl, notificationHandler, visitorName);
-            ws.sendMessage(visitorName);
             return String.format("You created user with username %s", params[1]);
         }
         throw new ResponseException(400, "Expected: <username> <password> <email>");
@@ -126,7 +125,9 @@ public class ChessClient {
             GameData testGame = new GameData(1, null, null, "testGame", new ChessGame());
             this.drawBoard(testGame);
             this.state = State.IN_GAME;
-            return String.format("You joined game with ID %d", gameID);
+            ws = new WebSocketFacade(serverUrl, notificationHandler, visitorName);
+            ws.sendMessage(UserGameCommand.CommandType.CONNECT, this.authToken, gameID, params[1].toUpperCase());
+//            return String.format("You joined game with ID %d", gameID);
         }
         throw new ResponseException(400, "Expected: <gameID> [WHITE|BLACK]");
     }

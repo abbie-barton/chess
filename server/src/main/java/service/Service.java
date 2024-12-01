@@ -4,6 +4,7 @@ import chess.ChessGame;
 import dataaccess.DataAccess;
 import model.*;
 import org.mindrot.jbcrypt.BCrypt;
+import server.UnauthorizedException;
 
 import java.util.Collection;
 import java.util.List;
@@ -109,5 +110,14 @@ public class Service {
 
     public void clear() throws ServiceException {
         dataAccess.clear();
+    }
+
+    public String getAuth(String authToken) {
+        AuthData auth = dataAccess.getAuth(authToken);
+        if (auth == null) {
+            return null;
+        } else {
+            return auth.username();
+        }
     }
 }

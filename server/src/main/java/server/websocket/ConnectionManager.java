@@ -37,4 +37,23 @@ public class ConnectionManager {
         }
     }
 
+    public void alertRoot(String rootVisitorName, ServerMessage notification) throws IOException {
+        var removeList = new ArrayList<Connection>();
+        for (var c : connections.values()) {
+            if (c.session.isOpen()) {
+                // only send to visitorName
+                if (c.visitorName.equals(rootVisitorName)) {
+                    c.send(notification.getJsonFields());
+                }
+            } else {
+                removeList.add(c);
+            }
+        }
+
+        // Clean up any connections that were left open.
+        for (var c : removeList) {
+            connections.remove(c.visitorName);
+        }
+    }
+
 }

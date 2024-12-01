@@ -65,7 +65,6 @@ public class Server {
     private String createUser(Request req, Response res) throws Exception {
         UserData newUser = serializer.fromJson(req.body(), UserData.class);
         AuthData result = service.registerUser(newUser);
-        webSocketHandler.testBroadcast();
         return serializer.toJson(result);
     }
 
@@ -132,5 +131,12 @@ public class Server {
     public void stop() {
         Spark.stop();
         Spark.awaitStop();
+    }
+
+    // for use in WebSocketHandler
+    public void getAuth(String authToken) throws UnauthorizedException {
+        try {
+            service.get
+        }
     }
 }

@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import server.UnauthorizedException;
+import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
@@ -15,28 +17,55 @@ public class WebSocketHandler {
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws IOException {
-        ServerMessage action = new Gson().fromJson(message, ServerMessage.class);
-        switch (action.getServerMessageType()) {
-//            case LOAD_GAME ->
-//            case ERROR ->
-            case NOTIFICATION -> notification(action.getVisitorName(), session);
+        String username = "";
+        try {
+            UserGameCommand action = new Gson().fromJson(message, UserGameCommand.class);
+            username = validateUser(action.getAuthToken());
+            switch (action.getCommandType()) {
+                case CONNECT -> connect(action.getVisitorName(), action.getAuthToken(),
+                        action.getGameID(), action.getVisitorColor(), session);
+                // case MAKE_MOVE ->
+                // case LEAVE ->
+                // case RESIGN ->
+            }
+        } catch (UnauthorizedException ex) {
+            error(username, "Error: unauthorized");
         }
     }
 
-    private void notification(String visitorName, Session session) throws IOException {
-        connections.add(visitorName, session);
-        String message = String.format("%s, this is a test notification!", visitorName);
+    private void connect(String visitorName, String authToken, int gameID, String color, Session session) throws IOException {
+        connections.add(authToken, session);
+        String message = String.format("You joined game %s!", gameID);
+        Map<String, Object> fields = Map.of("message", message, "authToken", authToken,
+                "gameID", gameID, "serverMessageType", ServerMessage.ServerMessageType.LOAD_GAME);
+        var json = new Gson().toJson(fields);
+        ServerMessage notification = new ServerMessage(visitorName,
+                ServerMessage.ServerMessageType.LOAD_GAME, json, message);
+        // send LOAD_GAME message to root
+        connections.alertRoot(visitorName, notification);
+        // send NOTIFICATION to other game users
+        String notifyMessage = String.format("%s joined the game as %s.", visitorName, color);
+        this.notification(visitorName, notifyMessage);
+    }
+
+    private void notification(String visitorName, String message) throws IOException {
         Map<String, String> fields = Map.of("message", message);
         var json = new Gson().toJson(fields);
-        ServerMessage notification = new ServerMessage(visitorName, ServerMessage.ServerMessageType.NOTIFICATION, json, message);
+        ServerMessage notification = new ServerMessage(visitorName,
+                ServerMessage.ServerMessageType.NOTIFICATION, json, message);
         connections.broadcast(visitorName, notification);
     }
 
-    public void testBroadcast() throws IOException {
-        var message = "THIS IS A TEST BROADCAST. DO NOT PANIC PLEASE";
-        var notification = new ServerMessage("test", ServerMessage.ServerMessageType.NOTIFICATION);
-        notification.setMessage(message);
-        connections.broadcast("", notification);
+    private void error(String username, String message) throws IOException {
+        Map<String, Object> fields = Map.of("message", message);
+        var json = new Gson().toJson(fields);
+        ServerMessage notification = new ServerMessage(username,
+                ServerMessage.ServerMessageType.ERROR, json, message);
+        connections.alertRoot(username, notification);
+    }
+
+    private String validateUser(String authToken) throws UnauthorizedException {
+
     }
 
 }
