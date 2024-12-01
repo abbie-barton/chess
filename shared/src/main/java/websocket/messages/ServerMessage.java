@@ -30,11 +30,12 @@ public class ServerMessage {
         this.visitorName = visitorName;
     }
 
-    public ServerMessage(String visitorName, ServerMessageType type, String fields, String message) {
+    public ServerMessage(String visitorName, ServerMessageType type, String fields, String message, GameData game) {
         this.serverMessageType = type;
         this.visitorName = visitorName;
         this.fields = fields;
         this.message = message;
+        this.game = game;
     }
 
     public ServerMessageType getServerMessageType() {

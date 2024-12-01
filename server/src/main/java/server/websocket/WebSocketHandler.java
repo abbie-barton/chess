@@ -40,9 +40,9 @@ public class WebSocketHandler {
                 // case RESIGN ->
             }
         } catch (UnauthorizedException ex) {
-            error(username, "Error: unauthorized");
+            error(username,"Error: unauthorized");
         } catch (Exception ex) {
-            error(username, "Error: " + ex.getMessage());
+            error(username,"Error: " + ex.getMessage());
         }
     }
 
@@ -50,15 +50,14 @@ public class WebSocketHandler {
         try {
             connections.add(visitorName, session);
             String message = String.format("You joined game %s!", gameID);
-            Map<String, Object> fields = Map.of("message", message, "authToken", authToken,
-                    "gameID", gameID, "serverMessageType", ServerMessage.ServerMessageType.LOAD_GAME);
-            var json = new Gson().toJson(fields);
-            ServerMessage notification = new ServerMessage(visitorName,
-                    ServerMessage.ServerMessageType.LOAD_GAME, json, message);
-
             // set chessGame for gameID
             GameData game = getGame(gameID);
-            notification.setGame(game);
+
+            Map<String, Object> fields = Map.of("message", message, "visitorName", visitorName, "gameID", gameID,
+                    "serverMessageType", ServerMessage.ServerMessageType.LOAD_GAME, "game", game);
+            var json = new Gson().toJson(fields);
+            ServerMessage notification = new ServerMessage(visitorName,
+                    ServerMessage.ServerMessageType.LOAD_GAME, json, message, game);
 
             // send LOAD_GAME message to root
             connections.alertRoot(visitorName, notification);
@@ -71,25 +70,27 @@ public class WebSocketHandler {
                 // send NOTIFICATION to other game users
                 notifyMessage = String.format("%s joined the game as %s.", visitorName, color);
             }
-            this.notification(visitorName, notifyMessage);
+            this.notification(visitorName, gameID, notifyMessage);
         } catch (Exception ex) {
-            error(visitorName, "Error: Game not found");
+            error(visitorName,"Error: Game not found");
         }
     }
 
-    private void notification(String visitorName, String message) throws IOException {
-        Map<String, String> fields = Map.of("message", message);
+    private void notification(String visitorName, Integer gameID, String message) throws IOException {
+        Map<String, Object> fields = Map.of("message", message, "visitorName", visitorName, "gameID", gameID,
+                "serverMessageType", ServerMessage.ServerMessageType.NOTIFICATION);
         var json = new Gson().toJson(fields);
         ServerMessage notification = new ServerMessage(visitorName,
-                ServerMessage.ServerMessageType.NOTIFICATION, json, message);
+                ServerMessage.ServerMessageType.NOTIFICATION, json, message, null);
         connections.broadcast(visitorName, notification);
     }
 
     private void error(String username, String message) throws IOException {
-        Map<String, Object> fields = Map.of("message", message);
+        Map<String, Object> fields = Map.of("message", message, "visitorName", username,
+                "serverMessageType", ServerMessage.ServerMessageType.ERROR);
         var json = new Gson().toJson(fields);
         ServerMessage notification = new ServerMessage(username,
-                ServerMessage.ServerMessageType.ERROR, json, message);
+                ServerMessage.ServerMessageType.ERROR, json, message, null);
         connections.alertRoot(username, notification);
     }
 

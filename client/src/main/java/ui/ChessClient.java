@@ -170,6 +170,15 @@ public class ChessClient {
                        quit - playing chess
                        help - with possible commands
                    """;
+        } else if (state == State.IN_GAME) {
+            return SET_TEXT_BOLD + SET_TEXT_COLOR_LIGHT_GREY + """
+                    redraw - board
+                    leave - the chess game
+                    make move - <START_POSITION> <END_POSITION>
+                    highlight - legal moves
+                    resign - the game
+                    help - with possible commands
+                """;
         }
         return SET_TEXT_BOLD + SET_TEXT_COLOR_LIGHT_GREY + """
                 
@@ -190,9 +199,10 @@ public class ChessClient {
         }
     }
 
-    public void drawBoard() {
+    public void drawBoard(GameData currGame) {
+        System.out.println("\n");
         if (state == State.IN_GAME || state == State.OBSERVE) {
-            DrawBoard.main(this.game, !Objects.equals(visitorName, game.blackUsername()));
+            DrawBoard.main(currGame, !Objects.equals(visitorName, currGame.blackUsername()));
         }
     }
 
