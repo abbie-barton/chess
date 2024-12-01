@@ -120,4 +120,8 @@ public class Service {
             return auth.username();
         }
     }
+
+    public GameData getGame(Integer gameID) {
+        return dataAccess.getGame(gameID);
+    }
 }

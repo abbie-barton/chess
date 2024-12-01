@@ -7,6 +7,7 @@ import ui.websocket.NotificationHandler;
 import websocket.commands.UserGameCommand;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import static ui.EscapeSequences.*;
 
@@ -19,6 +20,7 @@ public class ChessClient {
     private String visitorName = null;
     private String authToken = null;
     private Integer numGames = 0;
+    private GameData game = null;
 
     public ChessClient(String serverUrl, NotificationHandler notificationHandler) {
         server = new ServerFacade(serverUrl);
@@ -122,8 +124,6 @@ public class ChessClient {
             } catch (Exception ex) {
                 return String.format(ex.getMessage());
             }
-            GameData testGame = new GameData(1, null, null, "testGame", new ChessGame());
-            this.drawBoard(testGame);
             this.state = State.IN_GAME;
             ws = new WebSocketFacade(serverUrl, notificationHandler, visitorName);
             ws.sendMessage(UserGameCommand.CommandType.CONNECT, this.authToken, gameID, params[1].toUpperCase());
@@ -137,10 +137,10 @@ public class ChessClient {
         int gameID = Integer.parseInt(params[0]);
         if (gameID <= 0 || gameID > numGames) {
             return String.format("That game ID does not exist");
-        } else {
-            GameData game = new GameData(gameID, null, null, "", new ChessGame());
-            drawBoard(game);
         }
+        this.state = State.OBSERVE;
+        ws = new WebSocketFacade(serverUrl, notificationHandler, visitorName);
+        ws.sendMessage(UserGameCommand.CommandType.CONNECT, this.authToken, gameID, null);
         return String.format("You are observing game with ID %d", gameID);
     }
 
@@ -190,9 +190,13 @@ public class ChessClient {
         }
     }
 
-    private void drawBoard(GameData game) {
-        DrawBoard.main(game, true);
-        System.out.print("\n");
-        DrawBoard.main(game, false);
+    public void drawBoard() {
+        if (state == State.IN_GAME || state == State.OBSERVE) {
+            DrawBoard.main(this.game, !Objects.equals(visitorName, game.blackUsername()));
+        }
+    }
+
+    public void setGame(GameData game) {
+        this.game = game;
     }
 }

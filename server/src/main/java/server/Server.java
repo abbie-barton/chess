@@ -132,11 +132,4 @@ public class Server {
         Spark.stop();
         Spark.awaitStop();
     }
-
-    // for use in WebSocketHandler
-    public void getAuth(String authToken) throws UnauthorizedException {
-        try {
-            service.get
-        }
-    }
 }

@@ -43,6 +43,10 @@ public class Repl implements NotificationHandler {
     }
 
     public void notify(ServerMessage notification) {
+        if (notification.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
+            client.setGame(notification.getGame());
+            client.drawBoard();
+        }
         System.out.println("\n\n       " + SET_TEXT_BOLD + SET_TEXT_COLOR_LIGHT_GREY + notification.getMessage());
         printPrompt();
     }
