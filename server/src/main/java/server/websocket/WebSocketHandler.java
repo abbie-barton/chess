@@ -78,7 +78,6 @@ public class WebSocketHandler {
 
     private void leave(String visitorName, int gameID, String color, Session session) throws IOException {
         try {
-            connections.remove(visitorName);
             removeGamePlayer(gameID, color.toUpperCase());
             String message = String.format("You left game %s!", gameID);
             Map<String, Object> fields = Map.of("message", message, "visitorName", visitorName, "gameID", gameID,
@@ -87,6 +86,8 @@ public class WebSocketHandler {
             ServerMessage notification = new ServerMessage(visitorName,
                     ServerMessage.ServerMessageType.NOTIFICATION, json, message, null);
             connections.alertRoot(visitorName, notification);
+
+            connections.remove(visitorName);
 
             String notifyMessage = String.format("%s left the game.", visitorName);
             this.notification(visitorName, gameID, notifyMessage);

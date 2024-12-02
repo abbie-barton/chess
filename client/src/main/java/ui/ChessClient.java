@@ -21,6 +21,7 @@ public class ChessClient {
     private String authToken = null;
     private Integer numGames = 0;
     private GameData game = null;
+    private String visitorColor = null;
 
     public ChessClient(String serverUrl, NotificationHandler notificationHandler) {
         server = new ServerFacade(serverUrl);
@@ -53,11 +54,11 @@ public class ChessClient {
 
     public String login(String... params) throws ResponseException {
         if (params.length >= 2) {
-            state = State.LOGGED_IN;
             visitorName = params[0];
             UserData user = new UserData(params[0], params[1], null);
             AuthData auth = server.login(user);
             this.authToken = auth.authToken();
+            state = State.LOGGED_IN;
             return String.format("You signed in as %s.", visitorName);
         }
         throw new ResponseException(400, "Expected: <yourname>");
@@ -65,11 +66,11 @@ public class ChessClient {
 
     public String register(String... params) throws ResponseException {
         if (params.length >= 3) {
-            state = State.LOGGED_IN;
             UserData newUser = new UserData(params[0], params[1], params[2]);
             AuthData auth = server.createUser(newUser);
             visitorName = params[0];
             this.authToken = auth.authToken();
+            state = State.LOGGED_IN;
             return String.format("You created user with username %s", params[1]);
         }
         throw new ResponseException(400, "Expected: <username> <password> <email>");
@@ -125,6 +126,7 @@ public class ChessClient {
                 return String.format(ex.getMessage());
             }
             this.state = State.IN_GAME;
+            this.visitorColor = params[1].toUpperCase();
             ws = new WebSocketFacade(serverUrl, notificationHandler, visitorName);
             ws.sendMessage(UserGameCommand.CommandType.CONNECT, this.authToken, gameID, params[1].toUpperCase());
 //            return String.format("You joined game with ID %d", gameID);
@@ -188,9 +190,11 @@ public class ChessClient {
                 """;
     }
 
-    private String changeLoginState() {
+    private String changeLoginState() throws ResponseException {
         state = State.LOGGED_IN;
-        return String.format("You left the chess game.");
+        ws = new WebSocketFacade(serverUrl, notificationHandler, visitorName);
+        ws.sendMessage(UserGameCommand.CommandType.LEAVE, this.authToken, game.gameID(), visitorColor);
+        return "";
     }
 
     private void assertSignedIn() throws ResponseException {
