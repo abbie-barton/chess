@@ -121,12 +121,20 @@ public class Service {
         }
     }
 
-    public GameData getGame(Integer gameID) {
+    public GameData getGame(int gameID) {
         return dataAccess.getGame(gameID);
     }
 
-    public void removeGamePlayer(Integer gameID, String colorToRemove) {
+    public void removeGamePlayer(int gameID, String colorToRemove) {
         // replace color username with null
         dataAccess.updateGame(gameID, colorToRemove, null);
+    }
+
+    public void markGameAsOver(int gameID) {
+        dataAccess.markGameAsOver(gameID);
+    }
+
+    public void updateMoves(String authToken, GameData game) {
+
     }
 }

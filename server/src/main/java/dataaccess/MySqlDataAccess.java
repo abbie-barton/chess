@@ -178,6 +178,21 @@ public class MySqlDataAccess implements DataAccess {
         }
     }
 
+    public void updateGameMoves(int gameID, String playerColor, GameData newGame) {
+
+    }
+
+    @Override
+    public void markGameAsOver(int gameID) {
+        var statement = "UPDATE game SET is_over = 1 WHERE id = ?";
+        try {
+            executeUpdate(statement, gameID);
+            System.out.println("Game was set to over.");
+        } catch (Exception ex) {
+            System.out.println("Error updating game");
+        }
+    }
+
     @Override
     public void clear() {
         try {

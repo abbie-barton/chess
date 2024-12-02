@@ -51,6 +51,10 @@ public class Server {
         Spark.put("/game", this::joinGame);
         Spark.exception(Exception.class, this::exceptionHandler);
 
+        // update game endpoint
+        Spark.put("/update-game", this::updateGame);
+        Spark.exception(Exception.class, this::exceptionHandler);
+
         // clear endpoint
         Spark.delete("/db", this::clear);
         Spark.exception(Exception.class, this::exceptionHandler);
@@ -99,6 +103,15 @@ public class Server {
         String authToken = req.headers("authorization");
         JoinGameRequest game = serializer.fromJson(req.body(), JoinGameRequest.class);
         service.joinGame(authToken, game.playerColor(), game.gameID());
+        res.status(200);
+        return serializer.toJson(Map.of("message", "Success"));
+    }
+
+    private String updateGame(Request req, Response res) throws Exception {
+        String authToken = req.headers("authorization");
+        GameData game = serializer.fromJson(req.body(), GameData.class);
+        // will replace the game in the database with the new game
+        service.updateMoves(authToken, game);
         res.status(200);
         return serializer.toJson(Map.of("message", "Success"));
     }

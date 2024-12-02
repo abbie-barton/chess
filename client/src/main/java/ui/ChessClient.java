@@ -44,6 +44,7 @@ public class ChessClient {
                 case "join" -> joinGame(params);
                 case "observe" -> observeGame(params);
                 case "leave" -> changeLoginState();
+                case "resign" -> resign();
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -146,6 +147,37 @@ public class ChessClient {
         return String.format("You are observing game with ID %d", gameID);
     }
 
+    private String changeLoginState() throws ResponseException {
+        state = State.LOGGED_IN;
+        ws = new WebSocketFacade(serverUrl, notificationHandler, visitorName);
+        ws.sendMessage(UserGameCommand.CommandType.LEAVE, this.authToken, game.gameID(), visitorColor);
+        return "";
+    }
+
+    private String resign() throws ResponseException {
+        state = State.LOGGED_IN;
+        ws = new WebSocketFacade(serverUrl, notificationHandler, visitorName);
+        ws.sendMessage(UserGameCommand.CommandType.RESIGN, this.authToken, game.gameID(), visitorColor);
+        return "";
+    }
+
+    private void assertSignedIn() throws ResponseException {
+        if (state == State.LOGGED_OUT) {
+            throw new ResponseException(400, "You must sign in");
+        }
+    }
+
+    public void drawBoard(GameData currGame) {
+        System.out.println("\n");
+        if (state == State.IN_GAME || state == State.OBSERVE) {
+            DrawBoard.main(currGame, !Objects.equals(visitorName, currGame.blackUsername()));
+        }
+    }
+
+    public void setGame(GameData game) {
+        this.game = game;
+    }
+
     public String clear() throws ResponseException {
         assertSignedIn();
         server.clear();
@@ -188,29 +220,5 @@ public class ChessClient {
                     leave - the chess game
                     help - with possible commands
                 """;
-    }
-
-    private String changeLoginState() throws ResponseException {
-        state = State.LOGGED_IN;
-        ws = new WebSocketFacade(serverUrl, notificationHandler, visitorName);
-        ws.sendMessage(UserGameCommand.CommandType.LEAVE, this.authToken, game.gameID(), visitorColor);
-        return "";
-    }
-
-    private void assertSignedIn() throws ResponseException {
-        if (state == State.LOGGED_OUT) {
-            throw new ResponseException(400, "You must sign in");
-        }
-    }
-
-    public void drawBoard(GameData currGame) {
-        System.out.println("\n");
-        if (state == State.IN_GAME || state == State.OBSERVE) {
-            DrawBoard.main(currGame, !Objects.equals(visitorName, currGame.blackUsername()));
-        }
-    }
-
-    public void setGame(GameData game) {
-        this.game = game;
     }
 }

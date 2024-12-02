@@ -36,8 +36,8 @@ public class WebSocketHandler {
                 case CONNECT -> connect(action.getVisitorName(), action.getAuthToken(),
                         action.getGameID(), action.getVisitorColor(), session);
                 // case MAKE_MOVE ->
-                case LEAVE -> leave(username, action.getGameID(), action.getVisitorColor(), session);
-                // case RESIGN ->
+                case LEAVE -> leave(username, action.getGameID(), action.getVisitorColor());
+                case RESIGN -> resign(username, action.getGameID(), action.getVisitorColor());
             }
         } catch (UnauthorizedException ex) {
             error(username,"Error: unauthorized");
@@ -76,7 +76,7 @@ public class WebSocketHandler {
         }
     }
 
-    private void leave(String visitorName, int gameID, String color, Session session) throws IOException {
+    private void leave(String visitorName, int gameID, String color) throws IOException {
         try {
             removeGamePlayer(gameID, color.toUpperCase());
             String message = String.format("You left game %s!", gameID);
@@ -94,6 +94,10 @@ public class WebSocketHandler {
         } catch (Exception ex) {
             error(visitorName, "Error: " + ex.getMessage());
         }
+    }
+
+    private void resign(String visitorName, int gameID, String color) throws IOException {
+
     }
 
     private void notification(String visitorName, Integer gameID, String message) throws IOException {
@@ -139,6 +143,19 @@ public class WebSocketHandler {
         } else {
             try {
                 service.removeGamePlayer(gameID, colorToRemove);
+            } catch (Exception ex) {
+                throw new ServiceException("Error: " + ex.getMessage());
+            }
+        }
+    }
+
+    private void markGameAsOver(int gameID) throws Exception {
+        var game = service.getGame(gameID);
+        if (game == null) {
+            throw new ServiceException("Error: Game does not exist");
+        } else {
+            try {
+                service.markGameAsOver(gameID);
             } catch (Exception ex) {
                 throw new ServiceException("Error: " + ex.getMessage());
             }
