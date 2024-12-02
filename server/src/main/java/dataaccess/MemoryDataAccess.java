@@ -27,8 +27,10 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public GameData getGame(int gameID) {
-        return games.get(gameID);
+    public ModifiedGameData getGame(int gameID) {
+        GameData game = games.get(gameID);
+        return new ModifiedGameData(game.gameID(), game.whiteUsername(), game.blackUsername(),
+                game.gameName(), game.game(), 0);
     }
 
     @Override

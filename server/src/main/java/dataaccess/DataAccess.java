@@ -11,7 +11,7 @@ public interface DataAccess {
 
     UserData createUser(UserData newUser);
 
-    GameData getGame(int gameID);
+    ModifiedGameData getGame(int gameID);
 
     GameData createGame(String gameName);
 

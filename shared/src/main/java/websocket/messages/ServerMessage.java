@@ -1,9 +1,8 @@
 package websocket.messages;
 
-import chess.ChessGame;
 import model.GameData;
+import model.ModifiedGameData;
 
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -17,7 +16,7 @@ public class ServerMessage {
     String message = "default message";
     String visitorName;
     String fields = ""; //json string representation of fields
-    GameData game = null;
+    ModifiedGameData game = null;
 
     public enum ServerMessageType {
         LOAD_GAME,
@@ -30,7 +29,7 @@ public class ServerMessage {
         this.visitorName = visitorName;
     }
 
-    public ServerMessage(String visitorName, ServerMessageType type, String fields, String message, GameData game) {
+    public ServerMessage(String visitorName, ServerMessageType type, String fields, String message, ModifiedGameData game) {
         this.serverMessageType = type;
         this.visitorName = visitorName;
         this.fields = fields;
@@ -50,11 +49,11 @@ public class ServerMessage {
         return this.message;
     }
 
-    public void setGame(GameData game) {
+    public void setGame(ModifiedGameData game) {
         this.game = game;
     }
 
-    public GameData getGame() {
+    public ModifiedGameData getGame() {
         return game;
     }
 

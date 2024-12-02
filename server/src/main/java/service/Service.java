@@ -95,7 +95,7 @@ public class Service {
         if (auth == null) {
             throw new ServiceException("Error: unauthorized");
         } else {
-            GameData game = dataAccess.getGame(gameID);
+            ModifiedGameData game = dataAccess.getGame(gameID);
             if (game == null) {
                 throw new ServiceException("Error: bad request");
             }
@@ -121,7 +121,7 @@ public class Service {
         }
     }
 
-    public GameData getGame(int gameID) {
+    public ModifiedGameData getGame(int gameID) {
         return dataAccess.getGame(gameID);
     }
 

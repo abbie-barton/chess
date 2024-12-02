@@ -1,12 +1,15 @@
 package ui;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
 import model.*;
 import ui.websocket.WebSocketFacade;
 import ui.websocket.NotificationHandler;
 import websocket.commands.UserGameCommand;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
 
 import static ui.EscapeSequences.*;
@@ -20,7 +23,7 @@ public class ChessClient {
     private String visitorName = null;
     private String authToken = null;
     private Integer numGames = 0;
-    private GameData game = null;
+    private ModifiedGameData game = null;
     private String visitorColor = null;
 
     public ChessClient(String serverUrl, NotificationHandler notificationHandler) {
@@ -45,6 +48,8 @@ public class ChessClient {
                 case "observe" -> observeGame(params);
                 case "leave" -> changeLoginState();
                 case "resign" -> resign();
+                case "make" -> makeMove(params);
+                case "highlight" -> highlight();
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -155,9 +160,25 @@ public class ChessClient {
     }
 
     private String resign() throws ResponseException {
-        state = State.LOGGED_IN;
+        this.game = new ModifiedGameData(game.gameID(), game.whiteUsername(), game.blackUsername(),
+                game.gameName(), game.game(), 1);
         ws = new WebSocketFacade(serverUrl, notificationHandler, visitorName);
         ws.sendMessage(UserGameCommand.CommandType.RESIGN, this.authToken, game.gameID(), visitorColor);
+        return "";
+    }
+
+    private String makeMove(String... params) throws ResponseException {
+        if (game.is_over() == 1) {
+            return "Game is over. You cannot make any more moves.";
+        }
+        return "";
+    }
+
+    private String highlight(String... params) throws ResponseException {
+        ChessGame currGame = this.game.game();
+        Collection<ChessMove> validMoves =
+                currGame.validMoves(new ChessPosition(Integer.parseInt(params[0]), Integer.parseInt(params[1])));
+        // draw board with valid moves highlighted
         return "";
     }
 
@@ -174,7 +195,7 @@ public class ChessClient {
         }
     }
 
-    public void setGame(GameData game) {
+    public void setGame(ModifiedGameData game) {
         this.game = game;
     }
 

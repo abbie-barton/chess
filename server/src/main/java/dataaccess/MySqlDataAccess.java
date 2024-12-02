@@ -62,9 +62,9 @@ public class MySqlDataAccess implements DataAccess {
     }
 
     @Override
-    public GameData getGame(int gameID) {
+    public ModifiedGameData getGame(int gameID) {
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT id, white_username, black_username, game_name, game FROM game WHERE id=?";
+            var statement = "SELECT id, white_username, black_username, game_name, game, is_over FROM game WHERE id=?";
             try (var ps = conn.prepareStatement(statement)) {
                 ps.setInt(1, gameID);
                 try (var rs = ps.executeQuery()) {
@@ -98,11 +98,14 @@ public class MySqlDataAccess implements DataAccess {
     public Map<String, List<GameData>> listGames() {
         List<GameData> result = new ArrayList<>();
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT id, white_username, black_username, game_name, game FROM game";
+            var statement = "SELECT id, white_username, black_username, game_name, game, is_over FROM game";
             try (var ps = conn.prepareStatement(statement)) {
                 try (var rs = ps.executeQuery()) {
                     while (rs.next()) {
-                        result.add(readGame(rs));
+                        ModifiedGameData game = readGame(rs);
+                        GameData newGame = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(),
+                                game.gameName(), game.game());
+                        result.add(newGame);
                     }
                 }
             }
@@ -208,14 +211,15 @@ public class MySqlDataAccess implements DataAccess {
         }
     }
 
-    public GameData readGame(ResultSet rs) throws SQLException {
+    public ModifiedGameData readGame(ResultSet rs) throws SQLException {
         int id = rs.getInt("id");
         String whiteUsername = rs.getString("white_username");
         String blackUsername = rs.getString("black_username");
         String gameName = rs.getString("game_name");
         String json = rs.getString("game");
+        String isOver = rs.getString("is_over");
         ChessGame game = new Gson().fromJson(json, ChessGame.class);
-        return new GameData(id, whiteUsername, blackUsername, gameName, game);
+        return new ModifiedGameData(id, whiteUsername, blackUsername, gameName, game, Integer.parseInt(isOver));
     }
 
     private int executeUpdate(String statement, Object... params) throws DataAccessException {

@@ -90,7 +90,7 @@ public class DatabaseTests {
         AuthData authResult = dataAccess.createAuth(user.username());
         String gameName = "dance party";
         GameData createGameResult = dataAccess.createGame(gameName);
-        GameData getGameResult = dataAccess.getGame(createGameResult.gameID());
+        ModifiedGameData getGameResult = dataAccess.getGame(createGameResult.gameID());
         Assertions.assertEquals(createGameResult.gameName(), getGameResult.gameName());
     }
 
@@ -101,7 +101,7 @@ public class DatabaseTests {
         AuthData authResult = dataAccess.createAuth(user.username());
         String gameName = "dance party";
         GameData createGameResult = dataAccess.createGame(gameName);
-        GameData getGameResult = dataAccess.getGame(createGameResult.gameID() + 1);
+        ModifiedGameData getGameResult = dataAccess.getGame(createGameResult.gameID() + 1);
         Assertions.assertNull(getGameResult);
     }
 
@@ -145,7 +145,7 @@ public class DatabaseTests {
         AuthData authResult = dataAccess.createAuth(user.username());
         GameData createGameResult = dataAccess.createGame("aloe");
         dataAccess.updateGame(createGameResult.gameID(), "WHITE", createResult.username());
-        GameData getGameResult = dataAccess.getGame(createGameResult.gameID());
+        ModifiedGameData getGameResult = dataAccess.getGame(createGameResult.gameID());
         Assertions.assertNotEquals(createGameResult.whiteUsername(), getGameResult.whiteUsername());
     }
 
@@ -167,7 +167,7 @@ public class DatabaseTests {
         }
 
         dataAccess.updateGame(createGameResult.gameID(), "WHITE", createResult.username());
-        GameData getGameResult = dataAccess.getGame(createGameResult.gameID());
+        ModifiedGameData getGameResult = dataAccess.getGame(createGameResult.gameID());
         Assertions.assertNull(getGameResult);
     }
 

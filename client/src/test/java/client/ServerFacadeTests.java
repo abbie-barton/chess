@@ -170,7 +170,7 @@ public class ServerFacadeTests {
             GameData newGame = new GameData(1, null, null, "newGame", new ChessGame());
             GameData game = serverFacade.createGame(loginAuth.authToken(), newGame);
             serverFacade.joinGame(loginAuth.authToken(), "WHITE", game.gameID());
-            GameData gotGame = dataAccess.getGame(game.gameID());
+            ModifiedGameData gotGame = dataAccess.getGame(game.gameID());
             Assertions.assertNotNull(gotGame.whiteUsername());
         } catch (Exception ex) {
             Assertions.fail();

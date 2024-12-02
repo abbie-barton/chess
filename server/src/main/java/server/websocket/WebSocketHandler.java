@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.MySqlDataAccess;
 import model.GameData;
+import model.ModifiedGameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
@@ -51,7 +52,7 @@ public class WebSocketHandler {
             connections.add(visitorName, session);
             String message = String.format("You joined game %s!", gameID);
             // set chessGame for gameID
-            GameData game = getGame(gameID);
+            ModifiedGameData game = getGame(gameID);
 
             Map<String, Object> fields = Map.of("message", message, "visitorName", visitorName, "gameID", gameID,
                     "serverMessageType", ServerMessage.ServerMessageType.LOAD_GAME, "game", game);
@@ -97,7 +98,22 @@ public class WebSocketHandler {
     }
 
     private void resign(String visitorName, int gameID, String color) throws IOException {
+        try {
+            markGameAsOver(gameID);
 
+            String message = String.format("You resigned from game %s!", gameID);
+            Map<String, Object> fields = Map.of("message", message, "visitorName", visitorName, "gameID", gameID,
+                    "serverMessageType", ServerMessage.ServerMessageType.NOTIFICATION);
+            var json = new Gson().toJson(fields);
+            ServerMessage notification = new ServerMessage(visitorName,
+                    ServerMessage.ServerMessageType.NOTIFICATION, json, message, null);
+            connections.alertRoot(visitorName, notification);
+
+            String notifyMessage = String.format("%s resigned from the game.", visitorName);
+            this.notification(visitorName, gameID, notifyMessage);
+        } catch (Exception ex) {
+            error(visitorName, "Error: " + ex.getMessage());
+        }
     }
 
     private void notification(String visitorName, Integer gameID, String message) throws IOException {
@@ -127,7 +143,7 @@ public class WebSocketHandler {
         }
     }
 
-    private GameData getGame(int gameID) throws Exception {
+    private ModifiedGameData getGame(int gameID) throws Exception {
         var game = service.getGame(gameID);
         if (game == null) {
             throw new ServiceException("Error: Game does not exist");

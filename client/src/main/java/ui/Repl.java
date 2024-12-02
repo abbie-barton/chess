@@ -2,6 +2,7 @@ package ui;
 
 import chess.ChessGame;
 import model.GameData;
+import model.ModifiedGameData;
 import ui.websocket.NotificationHandler;
 import websocket.messages.ServerMessage;
 
@@ -44,8 +45,11 @@ public class Repl implements NotificationHandler {
 
     public void notify(ServerMessage notification) {
         if (notification.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
-            client.setGame(notification.getGame());
-            client.drawBoard(notification.getGame());
+            ModifiedGameData game = notification.getGame();
+            GameData newGame = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(),
+                    game.gameName(), game.game());
+            client.setGame(game);
+            client.drawBoard(newGame);
         }
         System.out.println(RESET_BG_COLOR + "\n\n       " + SET_TEXT_BOLD + SET_TEXT_COLOR_LIGHT_GREY
                 + notification.getMessage());

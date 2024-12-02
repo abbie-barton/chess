@@ -149,7 +149,7 @@ public class ServiceTests {
             AuthData registerResult = service.registerUser(user);
             GameData game = service.createGame(registerResult.authToken(), "babushka");
             service.joinGame(registerResult.authToken(), "WHITE", game.gameID());
-            GameData updatedGame = dataAccess.getGame(game.gameID());
+            ModifiedGameData updatedGame = dataAccess.getGame(game.gameID());
             Assertions.assertNotNull(updatedGame.whiteUsername());
         } catch (Exception e) {
             Assertions.fail();
