@@ -175,10 +175,13 @@ public class ChessClient {
     }
 
     private String highlight(String... params) throws ResponseException {
-        ChessGame currGame = this.game.game();
+        GameData currGame = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(),
+                game.gameName(), game.game());
+        ChessGame currChessGame = this.game.game();
         Collection<ChessMove> validMoves =
-                currGame.validMoves(new ChessPosition(Integer.parseInt(params[0]), Integer.parseInt(params[1])));
+                currChessGame.validMoves(new ChessPosition(Integer.parseInt(params[0]), Integer.parseInt(params[1])));
         // draw board with valid moves highlighted
+        this.drawBoard(currGame, validMoves);
         return "";
     }
 
@@ -188,10 +191,10 @@ public class ChessClient {
         }
     }
 
-    public void drawBoard(GameData currGame) {
+    public void drawBoard(GameData currGame, Collection<ChessMove> validMoves) {
         System.out.println("\n");
         if (state == State.IN_GAME || state == State.OBSERVE) {
-            DrawBoard.main(currGame, !Objects.equals(visitorName, currGame.blackUsername()));
+            DrawBoard.main(currGame, !Objects.equals(visitorName, currGame.blackUsername()), validMoves, null);
         }
     }
 

@@ -1,13 +1,11 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 import model.GameData;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 
 import static ui.EscapeSequences.*;
 
@@ -20,14 +18,15 @@ public class DrawBoard {
     // Padded characters.
     private static final String EMPTY = "   ";
 
-    public static void main(GameData game, boolean whiteAtBottom) {
+    public static void main(GameData game, boolean whiteAtBottom, Collection<ChessMove> validMoves,
+                            ChessPosition startPosition) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
 
         out.print(ERASE_SCREEN);
 
         drawHeaders(out, whiteAtBottom);
 
-        drawChessBoard(out, game.game(), whiteAtBottom);
+        drawChessBoard(out, game.game(), whiteAtBottom, validMoves, startPosition);
 
         drawHeaders(out, whiteAtBottom);
 
@@ -74,7 +73,8 @@ public class DrawBoard {
         setBlack(out);
     }
 
-    private static void drawChessBoard(PrintStream out, ChessGame game, boolean whiteAtBottom) {
+    private static void drawChessBoard(PrintStream out, ChessGame game, boolean whiteAtBottom,
+                                       Collection<ChessMove> validMoves, ChessPosition startPosition) {
         String[] rowLabels;
         if (whiteAtBottom) {
             rowLabels = new String[]{"8", "7", "6", "5", "4", "3", "2", "1"};
@@ -83,11 +83,12 @@ public class DrawBoard {
         }
 
         for (int boardRow = 0; boardRow < BOARD_SIZE_IN_SQUARES; ++boardRow) {
-            drawRowOfSquares(out, rowLabels[boardRow], game.getBoard(), whiteAtBottom);
+            drawRowOfSquares(out, rowLabels[boardRow], game.getBoard(), whiteAtBottom, validMoves, startPosition);
         }
     }
 
-    private static void drawRowOfSquares(PrintStream out, String label, ChessBoard board, boolean whiteAtBottom) {
+    private static void drawRowOfSquares(PrintStream out, String label, ChessBoard board, boolean whiteAtBottom,
+                                         Collection<ChessMove> validMoves, ChessPosition startPosition) {
         boolean setInitialDark;
         if (whiteAtBottom) {
             setInitialDark = Integer.parseInt(label) % 2 == 0;
@@ -103,6 +104,9 @@ public class DrawBoard {
                 out.print(EMPTY.repeat(2));
             }
             for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) {
+                if (positionIsValid(boardCol, squareRow, validMoves, startPosition)) {
+                    setGreen(out);
+                }
                 if ((setInitialDark && boardCol % 2 == 0) || (!setInitialDark && boardCol % 2 == 1)) {
                     setBrown(out);
                 } else {
@@ -143,6 +147,10 @@ public class DrawBoard {
         }
     }
 
+    private static boolean positionIsValid() {
+
+    }
+
     private static String getPieceString(ChessPiece maybePiece) {
         if (maybePiece == null) {
             return "   ";
@@ -172,6 +180,11 @@ public class DrawBoard {
     private static void setBlack(PrintStream out) {
         out.print(SET_BG_COLOR_BLACK);
         out.print(SET_TEXT_COLOR_BLACK);
+    }
+
+    private static void setGreen(PrintStream out) {
+        out.print(SET_BG_COLOR_DARK_GREEN);
+        out.print(SET_TEXT_COLOR_WHITE);
     }
 
     private static void printPlayer(PrintStream out, String player) {
