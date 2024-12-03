@@ -49,11 +49,13 @@ public class Repl implements NotificationHandler {
             GameData newGame = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(),
                     game.gameName(), game.game());
             client.setGame(game);
-            client.drawBoard(newGame, null);
+            client.drawBoard(newGame, null, null);
+            printPrompt();
+        } else {
+            System.out.println(RESET_BG_COLOR + "\n\n       " + SET_TEXT_BOLD + SET_TEXT_COLOR_LIGHT_GREY
+                    + notification.getMessage());
+            printPrompt();
         }
-        System.out.println(RESET_BG_COLOR + "\n\n       " + SET_TEXT_BOLD + SET_TEXT_COLOR_LIGHT_GREY
-                + notification.getMessage());
-        printPrompt();
     }
 
 }

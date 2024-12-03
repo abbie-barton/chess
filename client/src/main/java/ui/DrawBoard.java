@@ -104,13 +104,15 @@ public class DrawBoard {
                 out.print(EMPTY.repeat(2));
             }
             for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) {
-                if (positionIsValid(boardCol, squareRow, validMoves, startPosition)) {
-                    setGreen(out);
-                }
                 if ((setInitialDark && boardCol % 2 == 0) || (!setInitialDark && boardCol % 2 == 1)) {
                     setBrown(out);
                 } else {
                     setDarkBrown(out);
+                }
+
+                // turn square green if it's a valid move (for highlight command)
+                if (positionIsValid(boardCol, Integer.parseInt(label), validMoves, startPosition)) {
+                    setGreen(out);
                 }
 
                 if (squareRow == SQUARE_SIZE_IN_PADDED_CHARS / 2) {
@@ -147,8 +149,22 @@ public class DrawBoard {
         }
     }
 
-    private static boolean positionIsValid() {
-
+    private static boolean positionIsValid(int boardCol, int squareRow, Collection<ChessMove> validMoves,
+                                           ChessPosition startPosition) {
+        if (validMoves.isEmpty()) {
+            return false;
+        } else {
+            for (ChessMove move : validMoves) {
+                if (move.getStartPosition() != startPosition) {
+                    return false;
+                }
+                ChessPosition movePos = move.getEndPosition();
+                if (movePos.getColumn() == boardCol && movePos.getRow() == squareRow) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private static String getPieceString(ChessPiece maybePiece) {

@@ -49,7 +49,7 @@ public class ChessClient {
                 case "leave" -> changeLoginState();
                 case "resign" -> resign();
                 case "make" -> makeMove(params);
-                case "highlight" -> highlight();
+                case "highlight" -> highlight(params);
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -175,14 +175,41 @@ public class ChessClient {
     }
 
     private String highlight(String... params) throws ResponseException {
+        int[] rowAndCol = convertTextPosition(params);
+        if (rowAndCol.length == 0) {
+            return String.format("Expected: <START_POSITION>");
+        }
         GameData currGame = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(),
                 game.gameName(), game.game());
         ChessGame currChessGame = this.game.game();
+
         Collection<ChessMove> validMoves =
-                currChessGame.validMoves(new ChessPosition(Integer.parseInt(params[0]), Integer.parseInt(params[1])));
+                currChessGame.validMoves(new ChessPosition(rowAndCol[0], rowAndCol[1]));
+        if (validMoves.isEmpty()) {
+            return String.format("No valid moves for %s", params[0]);
+        }
         // draw board with valid moves highlighted
-        this.drawBoard(currGame, validMoves);
+        this.drawBoard(currGame, validMoves, new ChessPosition(rowAndCol[0], rowAndCol[1]));
         return "";
+    }
+
+    private int[] convertTextPosition(String... params) {
+        if (params.length == 0) {
+            return new int[] {};
+        }
+        char charRow = params[0].charAt(0);
+        int intRow = 1;
+        switch(charRow) {
+            case 'b' -> intRow = 2;
+            case 'c' -> intRow = 3;
+            case 'd' -> intRow = 4;
+            case 'e' -> intRow = 5;
+            case 'f' -> intRow = 6;
+            case 'g' -> intRow = 7;
+            case 'h' -> intRow = 8;
+        }
+        int col = params[0].charAt(1) - '0';
+        return new int[]{ intRow, col };
     }
 
     private void assertSignedIn() throws ResponseException {
@@ -191,10 +218,10 @@ public class ChessClient {
         }
     }
 
-    public void drawBoard(GameData currGame, Collection<ChessMove> validMoves) {
+    public void drawBoard(GameData currGame, Collection<ChessMove> validMoves, ChessPosition startPosition) {
         System.out.println("\n");
         if (state == State.IN_GAME || state == State.OBSERVE) {
-            DrawBoard.main(currGame, !Objects.equals(visitorName, currGame.blackUsername()), validMoves, null);
+            DrawBoard.main(currGame, !Objects.equals(visitorName, currGame.blackUsername()), validMoves, startPosition);
         }
     }
 
@@ -233,7 +260,7 @@ public class ChessClient {
                     redraw - board
                     leave - the chess game
                     make move - <START_POSITION> <END_POSITION>
-                    highlight - legal moves
+                    highlight <START_POSITION> - legal moves
                     resign - the game
                     help - with possible commands
                 """;
