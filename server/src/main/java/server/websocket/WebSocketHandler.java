@@ -30,12 +30,8 @@ public class WebSocketHandler {
         try {
             UserGameCommand action = new Gson().fromJson(message, UserGameCommand.class);
             username = getAuth(action.getAuthToken());
-            if (username == null) {
-                username = action.getVisitorName();
-            }
             switch (action.getCommandType()) {
-                case CONNECT -> connect(action.getVisitorName(), action.getAuthToken(),
-                        action.getGameID(), action.getVisitorColor(), session);
+                case CONNECT -> connect(username, action.getGameID(), action.getVisitorColor(), session);
                 // case MAKE_MOVE ->
                 case LEAVE -> leave(username, action.getGameID(), action.getVisitorColor());
                 case RESIGN -> resign(username, action.getGameID(), action.getVisitorColor());
@@ -47,18 +43,17 @@ public class WebSocketHandler {
         }
     }
 
-    private void connect(String visitorName, String authToken, int gameID, String color, Session session) throws IOException {
+    private void connect(String visitorName, int gameID, String color, Session session) throws IOException {
         try {
             connections.add(visitorName, session);
-            String message = String.format("You joined game %s!", gameID);
             // set chessGame for gameID
             ModifiedGameData game = getGame(gameID);
 
-            Map<String, Object> fields = Map.of("message", message, "visitorName", visitorName, "gameID", gameID,
+            Map<String, Object> fields = Map.of("visitorName", visitorName, "gameID", gameID,
                     "serverMessageType", ServerMessage.ServerMessageType.LOAD_GAME, "game", game);
             var json = new Gson().toJson(fields);
             ServerMessage notification = new ServerMessage(visitorName,
-                    ServerMessage.ServerMessageType.LOAD_GAME, json, message, game);
+                    ServerMessage.ServerMessageType.LOAD_GAME, json, null, game);
 
             // send LOAD_GAME message to root
             connections.alertRoot(visitorName, notification);
@@ -80,12 +75,11 @@ public class WebSocketHandler {
     private void leave(String visitorName, int gameID, String color) throws IOException {
         try {
             removeGamePlayer(gameID, color.toUpperCase());
-            String message = String.format("You left game %s!", gameID);
-            Map<String, Object> fields = Map.of("message", message, "visitorName", visitorName, "gameID", gameID,
+            Map<String, Object> fields = Map.of("visitorName", visitorName, "gameID", gameID,
                     "serverMessageType", ServerMessage.ServerMessageType.NOTIFICATION);
             var json = new Gson().toJson(fields);
             ServerMessage notification = new ServerMessage(visitorName,
-                    ServerMessage.ServerMessageType.NOTIFICATION, json, message, null);
+                    ServerMessage.ServerMessageType.NOTIFICATION, json, null, null);
             connections.alertRoot(visitorName, notification);
 
             connections.remove(visitorName);
@@ -101,12 +95,11 @@ public class WebSocketHandler {
         try {
             markGameAsOver(gameID);
 
-            String message = String.format("You resigned from game %s!", gameID);
-            Map<String, Object> fields = Map.of("message", message, "visitorName", visitorName, "gameID", gameID,
+            Map<String, Object> fields = Map.of(visitorName, visitorName, "gameID", gameID,
                     "serverMessageType", ServerMessage.ServerMessageType.NOTIFICATION);
             var json = new Gson().toJson(fields);
             ServerMessage notification = new ServerMessage(visitorName,
-                    ServerMessage.ServerMessageType.NOTIFICATION, json, message, null);
+                    ServerMessage.ServerMessageType.NOTIFICATION, json, null, null);
             connections.alertRoot(visitorName, notification);
 
             String notifyMessage = String.format("%s resigned from the game.", visitorName);

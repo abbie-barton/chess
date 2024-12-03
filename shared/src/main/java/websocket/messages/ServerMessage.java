@@ -13,7 +13,7 @@ import java.util.Objects;
  */
 public class ServerMessage {
     ServerMessageType serverMessageType;
-    String message = "default message";
+    String message = null;
     String visitorName;
     String fields = ""; //json string representation of fields
     ModifiedGameData game = null;

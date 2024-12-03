@@ -135,7 +135,7 @@ public class ChessClient {
             this.visitorColor = params[1].toUpperCase();
             ws = new WebSocketFacade(serverUrl, notificationHandler, visitorName);
             ws.sendMessage(UserGameCommand.CommandType.CONNECT, this.authToken, gameID, params[1].toUpperCase());
-//            return String.format("You joined game with ID %d", gameID);
+            return String.format("You joined game with ID %d", gameID);
         }
         throw new ResponseException(400, "Expected: <gameID> [WHITE|BLACK]");
     }
