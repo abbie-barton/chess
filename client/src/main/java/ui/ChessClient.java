@@ -1,8 +1,6 @@
 package ui;
 
-import chess.ChessGame;
-import chess.ChessMove;
-import chess.ChessPosition;
+import chess.*;
 import model.*;
 import ui.websocket.WebSocketFacade;
 import ui.websocket.NotificationHandler;
@@ -173,11 +171,36 @@ public class ChessClient {
         if (game.is_over() == 1) {
             return "Game is over. You cannot make any more moves.";
         }
-        return "";
+
+        int[] startRowAndCol = convertTextPosition(0, params);
+        int[] endRowAndCol = convertTextPosition(1, params);
+        ChessGame currGame = this.game.game();
+
+        // get the promotion piece if there
+        ChessPiece.PieceType type = null;
+        if (params[2] != null) {
+            try {
+                type = findPieceType(params[2]);
+            } catch (Exception ex) {
+                return ex.getMessage();
+            }
+        }
+
+        // try making the move - if an exception is caught, then move was invalid and was not made
+        ChessMove potentialMove = new ChessMove(new ChessPosition(startRowAndCol[0], startRowAndCol[1]),
+                new ChessPosition(endRowAndCol[0], endRowAndCol[1]), type);
+        try {
+            currGame.makeMove(potentialMove);
+            ws = new WebSocketFacade(serverUrl, notificationHandler, visitorName);
+            ws.sendMessage(UserGameCommand.CommandType.MAKE_MOVE, this.authToken, game.gameID(), visitorColor);
+            return String.format("Move made: %s to %s", params[0], params[1]);
+        } catch (InvalidMoveException ex) {
+            return "Invalid move. Try <highlight> to see valid moves";
+        }
     }
 
     private String highlight(String... params) throws ResponseException {
-        int[] rowAndCol = convertTextPosition(params);
+        int[] rowAndCol = convertTextPosition(0, params);
         if (rowAndCol.length == 0) {
             return String.format("Expected: <START_POSITION>");
         }
@@ -202,11 +225,23 @@ public class ChessClient {
         return "";
     }
 
-    private int[] convertTextPosition(String... params) {
+    private ChessPiece.PieceType findPieceType(String type) throws Exception {
+        return switch (type.toLowerCase()) {
+            case "queen" -> ChessPiece.PieceType.QUEEN;
+            case "bishop" -> ChessPiece.PieceType.BISHOP;
+            case "rook" -> ChessPiece.PieceType.ROOK;
+            case "knight" -> ChessPiece.PieceType.KNIGHT;
+            case "pawn" -> ChessPiece.PieceType.PAWN;
+            default -> throw new Exception("Unexpected value: " + type.toLowerCase() +
+                    "\n   Options: <queen> <rook> <bishop> <knight> <pawn>");
+        };
+    }
+
+    private int[] convertTextPosition(int index, String... params) {
         if (params.length == 0) {
             return new int[] {};
         }
-        char charRow = params[0].charAt(0);
+        char charRow = params[index].charAt(0);
         int intRow = 1;
         switch(charRow) {
             case 'b' -> intRow = 2;
@@ -217,7 +252,7 @@ public class ChessClient {
             case 'g' -> intRow = 7;
             case 'h' -> intRow = 8;
         }
-        int col = params[0].charAt(1) - '0';
+        int col = params[index].charAt(1) - '0';
         return new int[]{ col, intRow };
     }
 
@@ -236,6 +271,10 @@ public class ChessClient {
 
     public void setGame(ModifiedGameData game) {
         this.game = game;
+    }
+
+    public ModifiedGameData getGame() {
+        return this.game;
     }
 
     public String clear() throws ResponseException {
@@ -268,7 +307,7 @@ public class ChessClient {
             return SET_TEXT_BOLD + SET_TEXT_COLOR_LIGHT_GREY + """
                     redraw - board
                     leave - the chess game
-                    make move - <START_POSITION> <END_POSITION>
+                    make move - <START_POSITION> <END_POSITION> <PROMOTION_PIECE (optional)>
                     highlight <START_POSITION> - legal moves
                     resign - the game
                     help - with possible commands

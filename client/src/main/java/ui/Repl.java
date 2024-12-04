@@ -53,8 +53,14 @@ public class Repl implements NotificationHandler {
             printPrompt();
         } else {
             if (notification.getMessage() == null) {
-                printPrompt();
                 return;
+            }
+            if (notification.getMessage().contains("resign")) {
+                ModifiedGameData game = client.getGame();
+                // set is_over to true
+                ModifiedGameData newGame = new ModifiedGameData(game.gameID(), game.whiteUsername(),
+                        game.blackUsername(), game.gameName(), game.game(), 1);
+                client.setGame(newGame);
             }
             System.out.println(RESET_BG_COLOR + "\n\n       " + SET_TEXT_BOLD + SET_TEXT_COLOR_LIGHT_GREY
                     + notification.getMessage());
