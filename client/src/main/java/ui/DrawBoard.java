@@ -111,8 +111,12 @@ public class DrawBoard {
                 }
 
                 // turn square green if it's a valid move (for highlight command)
-                if (positionIsValid(boardCol, Integer.parseInt(label), validMoves, startPosition)) {
-                    setGreen(out);
+                if (positionIsValid(boardCol, Integer.parseInt(label), validMoves, startPosition, whiteAtBottom)) {
+                    if ((setInitialDark && boardCol % 2 == 0) || (!setInitialDark && boardCol % 2 == 1)) {
+                        setGreen(out);
+                    } else {
+                        setDarkGreen(out);
+                    }
                 }
 
                 if (squareRow == SQUARE_SIZE_IN_PADDED_CHARS / 2) {
@@ -150,16 +154,19 @@ public class DrawBoard {
     }
 
     private static boolean positionIsValid(int boardCol, int squareRow, Collection<ChessMove> validMoves,
-                                           ChessPosition startPosition) {
+                                           ChessPosition startPosition, boolean whiteAtBottom) {
+        if (!whiteAtBottom) {
+            boardCol = 7 - boardCol;
+        }
+        if (validMoves == null) {
+            return false;
+        }
         if (validMoves.isEmpty()) {
             return false;
         } else {
             for (ChessMove move : validMoves) {
-                if (move.getStartPosition() != startPosition) {
-                    return false;
-                }
                 ChessPosition movePos = move.getEndPosition();
-                if (movePos.getColumn() == boardCol && movePos.getRow() == squareRow) {
+                if (movePos.getColumn() == boardCol+1 && movePos.getRow() == squareRow) {
                     return true;
                 }
             }
@@ -199,6 +206,11 @@ public class DrawBoard {
     }
 
     private static void setGreen(PrintStream out) {
+        out.print(SET_BG_COLOR_GREEN);
+        out.print(SET_TEXT_COLOR_WHITE);
+    }
+
+    private static void setDarkGreen(PrintStream out) {
         out.print(SET_BG_COLOR_DARK_GREEN);
         out.print(SET_TEXT_COLOR_WHITE);
     }

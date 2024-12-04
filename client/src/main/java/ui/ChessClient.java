@@ -50,6 +50,7 @@ public class ChessClient {
                 case "resign" -> resign();
                 case "make" -> makeMove(params);
                 case "highlight" -> highlight(params);
+                case "redraw" -> redraw();
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -67,7 +68,7 @@ public class ChessClient {
             state = State.LOGGED_IN;
             return String.format("You signed in as %s.", visitorName);
         }
-        throw new ResponseException(400, "Expected: <yourname>");
+        throw new ResponseException(400, "Expected: <username> <password>");
     }
 
     public String register(String... params) throws ResponseException {
@@ -135,7 +136,7 @@ public class ChessClient {
             this.visitorColor = params[1].toUpperCase();
             ws = new WebSocketFacade(serverUrl, notificationHandler, visitorName);
             ws.sendMessage(UserGameCommand.CommandType.CONNECT, this.authToken, gameID, params[1].toUpperCase());
-            return String.format("You joined game with ID %d", gameID);
+            return String.format("You joined game with ID %d\n", gameID);
         }
         throw new ResponseException(400, "Expected: <gameID> [WHITE|BLACK]");
     }
@@ -162,9 +163,10 @@ public class ChessClient {
     private String resign() throws ResponseException {
         this.game = new ModifiedGameData(game.gameID(), game.whiteUsername(), game.blackUsername(),
                 game.gameName(), game.game(), 1);
+        this.state = State.LOGGED_IN;
         ws = new WebSocketFacade(serverUrl, notificationHandler, visitorName);
         ws.sendMessage(UserGameCommand.CommandType.RESIGN, this.authToken, game.gameID(), visitorColor);
-        return "";
+        return "You resigned from the game.";
     }
 
     private String makeMove(String... params) throws ResponseException {
@@ -193,6 +195,13 @@ public class ChessClient {
         return "";
     }
 
+    public String redraw() throws ResponseException {
+        GameData currGame = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(),
+                game.gameName(), game.game());
+        this.drawBoard(currGame, null, null);
+        return "";
+    }
+
     private int[] convertTextPosition(String... params) {
         if (params.length == 0) {
             return new int[] {};
@@ -209,7 +218,7 @@ public class ChessClient {
             case 'h' -> intRow = 8;
         }
         int col = params[0].charAt(1) - '0';
-        return new int[]{ intRow, col };
+        return new int[]{ col, intRow };
     }
 
     private void assertSignedIn() throws ResponseException {

@@ -52,6 +52,10 @@ public class Repl implements NotificationHandler {
             client.drawBoard(newGame, null, null);
             printPrompt();
         } else {
+            if (notification.getMessage() == null) {
+                printPrompt();
+                return;
+            }
             System.out.println(RESET_BG_COLOR + "\n\n       " + SET_TEXT_BOLD + SET_TEXT_COLOR_LIGHT_GREY
                     + notification.getMessage());
             printPrompt();
