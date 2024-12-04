@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import model.*;
 
 import java.util.Collection;
@@ -26,6 +27,8 @@ public interface DataAccess {
     void deleteAuth(String authToken) throws DataAccessException;
 
     void clear();
+
+    void updateGameMoves(int gameID, ChessGame newGame);
 
     void markGameAsOver(int gameID);
 }

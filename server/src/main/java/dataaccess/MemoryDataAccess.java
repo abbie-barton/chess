@@ -10,7 +10,7 @@ public class MemoryDataAccess implements DataAccess {
     private int nextGameId = 1;
     final private Map<String, UserData> users = new HashMap<>();
     final private Map<String, AuthData> auth = new HashMap<>();
-    final private Map<Integer, GameData> games = new HashMap<>();
+    final private Map<Integer, ModifiedGameData> games = new HashMap<>();
 
     @Override
     public UserData getUser(String userName) {
@@ -28,32 +28,41 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public ModifiedGameData getGame(int gameID) {
-        GameData game = games.get(gameID);
+        ModifiedGameData game = games.get(gameID);
         return new ModifiedGameData(game.gameID(), game.whiteUsername(), game.blackUsername(),
                 game.gameName(), game.game(), 0);
     }
 
     @Override
     public GameData createGame(String gameName) {
-        GameData game = new GameData(nextGameId, null, null, gameName, new ChessGame());
+        ModifiedGameData game = new ModifiedGameData(nextGameId, null, null,
+                gameName, new ChessGame(), 0);
+        GameData returnGame = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(),
+                game.gameName(), game.game());
         games.put(nextGameId, game);
         nextGameId++;
-        return game;
+        return returnGame;
     }
 
     @Override
     public Map<String, List<GameData>> listGames() {
-        return Map.of("games", new ArrayList<>(games.values()));
+        List<GameData> gameList = new ArrayList<>();
+        for (ModifiedGameData game : games.values()) {
+            GameData newGame = new GameData(game.gameID(), game.whiteUsername(),
+                    game.blackUsername(), game.gameName(), game.game());
+            gameList.add(newGame);
+        }
+        return Map.of("games", gameList);
     }
 
     @Override
     public void updateGame(int gameID, String playerColor, String username) {
         // update game
-        GameData game = games.get(gameID);
+        ModifiedGameData game = games.get(gameID);
         if (Objects.equals(playerColor, "WHITE")) {
-            games.put(gameID, new GameData(gameID, username, game.blackUsername(), game.gameName(), game.game()));
+            games.put(gameID, new ModifiedGameData(gameID, username, game.blackUsername(), game.gameName(), game.game(), 0));
         } else {
-            games.put(gameID, new GameData(gameID, game.whiteUsername(), username, game.gameName(), game.game()));
+            games.put(gameID, new ModifiedGameData(gameID, game.whiteUsername(), username, game.gameName(), game.game(), 0));
         }
     }
 
@@ -80,7 +89,18 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public void markGameAsOver(int gameID) {
-        // do it in memory
+        ModifiedGameData game = games.get(gameID);
+        ModifiedGameData completedGame = new ModifiedGameData(game.gameID(), game.whiteUsername(),
+                game.blackUsername(), game.gameName(), game.game(), 1);
+        games.put(gameID, completedGame);
+    }
+
+    @Override
+    public void updateGameMoves(int gameID, ChessGame newGame) {
+        ModifiedGameData game = games.get(gameID);
+        ModifiedGameData updatedGame = new ModifiedGameData(game.gameID(), game.whiteUsername(),
+                game.blackUsername(), game.gameName(), newGame, game.is_over());
+        games.put(gameID, updatedGame);
     }
 
     @Override

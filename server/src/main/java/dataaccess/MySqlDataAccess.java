@@ -5,7 +5,6 @@ import com.google.gson.Gson;
 import model.*;
 import org.mindrot.jbcrypt.BCrypt;
 
-import javax.xml.crypto.Data;
 import java.sql.ResultSet;
 import java.util.*;
 
@@ -181,8 +180,15 @@ public class MySqlDataAccess implements DataAccess {
         }
     }
 
-    public void updateGameMoves(int gameID, String playerColor, GameData newGame) {
-
+    @Override
+    public void updateGameMoves(int gameID, ChessGame newGame) {
+        try {
+            var statement = "UPDATE game SET game = ? WHERE id = ?";
+            executeUpdate(statement, newGame, gameID);
+            System.out.printf("Updated game with id %s%n", gameID);
+        } catch (Exception ex) {
+            System.out.println("Error updating game");
+        }
     }
 
     @Override

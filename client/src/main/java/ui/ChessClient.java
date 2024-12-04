@@ -134,7 +134,7 @@ public class ChessClient {
             this.visitorColor = params[1].toUpperCase();
             ws = new WebSocketFacade(serverUrl, notificationHandler, visitorName);
             ws.sendMessage(UserGameCommand.CommandType.CONNECT, this.authToken, gameID,
-                    params[1].toUpperCase(), null);
+                    params[1].toUpperCase(), null, null);
             return String.format("You joined game with ID %d\n", gameID);
         }
         throw new ResponseException(400, "Expected: <gameID> [WHITE|BLACK]");
@@ -148,14 +148,16 @@ public class ChessClient {
         }
         this.state = State.OBSERVE;
         ws = new WebSocketFacade(serverUrl, notificationHandler, visitorName);
-        ws.sendMessage(UserGameCommand.CommandType.CONNECT, this.authToken, gameID, null, null);
+        ws.sendMessage(UserGameCommand.CommandType.CONNECT, this.authToken, gameID,
+                null, null, null);
         return String.format("You are observing game with ID %d", gameID);
     }
 
     private String changeLoginState() throws ResponseException {
         state = State.LOGGED_IN;
         ws = new WebSocketFacade(serverUrl, notificationHandler, visitorName);
-        ws.sendMessage(UserGameCommand.CommandType.LEAVE, this.authToken, game.gameID(), visitorColor, null);
+        ws.sendMessage(UserGameCommand.CommandType.LEAVE, this.authToken, game.gameID(),
+                visitorColor, null, null);
         return "";
     }
 
@@ -164,7 +166,8 @@ public class ChessClient {
                 game.gameName(), game.game(), 1);
         this.state = State.LOGGED_IN;
         ws = new WebSocketFacade(serverUrl, notificationHandler, visitorName);
-        ws.sendMessage(UserGameCommand.CommandType.RESIGN, this.authToken, game.gameID(), visitorColor, null);
+        ws.sendMessage(UserGameCommand.CommandType.RESIGN, this.authToken, game.gameID(),
+                visitorColor, null, null);
         return "You resigned from the game.";
     }
 
@@ -196,7 +199,7 @@ public class ChessClient {
 //            server.updateGame();
             ws = new WebSocketFacade(serverUrl, notificationHandler, visitorName);
             ws.sendMessage(UserGameCommand.CommandType.MAKE_MOVE, this.authToken, game.gameID(),
-                    visitorColor, new String[] {params[0], params[1]});
+                    visitorColor, new String[] {params[0], params[1]}, currGame);
             return String.format("Move made: %s to %s", params[0], params[1]);
         } catch (InvalidMoveException ex) {
             return "Invalid move. Try <highlight> to see valid moves";

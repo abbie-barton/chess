@@ -203,6 +203,19 @@ public class WebSocketHandler {
         }
     }
 
+    private void updateGameMoves(int gameID, ChessGame updatedGame) throws Exception {
+        var game = service.getGame(gameID);
+        if (game == null) {
+            throw new Exception();
+        } else {
+            try {
+                service.updateMoves(gameID, updatedGame);
+            } catch (Exception ex) {
+                throw new Exception();
+            }
+        }
+    }
+
     private ServerMessage getGameNotification(String visitorName, int gameID) throws Exception {
         try {
             // set chessGame for gameID

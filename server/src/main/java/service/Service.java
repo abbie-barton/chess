@@ -134,7 +134,7 @@ public class Service {
         dataAccess.markGameAsOver(gameID);
     }
 
-    public void updateMoves(String authToken, GameData game) {
-
+    public void updateMoves(int gameID, ChessGame game) {
+        dataAccess.updateGameMoves(gameID, game);
     }
 }
