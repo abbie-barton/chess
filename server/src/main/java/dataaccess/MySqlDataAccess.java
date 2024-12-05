@@ -183,8 +183,9 @@ public class MySqlDataAccess implements DataAccess {
     @Override
     public void updateGameMoves(int gameID, ChessGame newGame) {
         try {
+            var json = new Gson().toJson(newGame);
             var statement = "UPDATE game SET game = ? WHERE id = ?";
-            executeUpdate(statement, newGame, gameID);
+            executeUpdate(statement, json, gameID);
             System.out.printf("Updated game with id %s%n", gameID);
         } catch (Exception ex) {
             System.out.println("Error updating game");

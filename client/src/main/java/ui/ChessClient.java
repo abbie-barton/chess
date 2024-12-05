@@ -142,6 +142,9 @@ public class ChessClient {
 
     public String observeGame(String... params) throws ResponseException {
         assertSignedIn();
+        if (params.length != 1) {
+            return String.format("Expected: observe <gameID>");
+        }
         int gameID = Integer.parseInt(params[0]);
         if (gameID <= 0 || gameID > numGames) {
             return String.format("That game ID does not exist");
@@ -172,37 +175,48 @@ public class ChessClient {
     }
 
     private String makeMove(String... params) throws ResponseException {
+        assertSignedIn();
+        if (params.length <= 2) {
+            return "Expected: make move <START_POSITION> <END_POSITION>";
+        }
         if (game.is_over() == 1) {
             return "Game is over. You cannot make any more moves.";
         }
 
-        int[] startRowAndCol = convertTextPosition(0, params);
-        int[] endRowAndCol = convertTextPosition(1, params);
+        int[] startRowAndCol = convertTextPosition(1, params);
+        int[] endRowAndCol = convertTextPosition(2, params);
         ChessGame currGame = this.game.game();
+        ChessBoard currBoard = currGame.getBoard();
+        ChessPiece currPiece = currBoard.getPiece(new ChessPosition(startRowAndCol[0], startRowAndCol[1]));
+
+        // if promotion piece is needed and not in params, give an error
+        if (params.length != 4 && currPiece != null && atEndOfBoard(visitorColor, endRowAndCol)) {
+            if (currPiece.getPieceType() == ChessPiece.PieceType.PAWN) {
+                return "You need a promotion piece! Expected: make move <START_POSITION> <END_POSITION> <PROMOTION_PIECE>";
+            }
+        }
 
         // get the promotion piece if there
         ChessPiece.PieceType type = null;
-        if (params[2] != null) {
+        if (params.length == 4 && atEndOfBoard(visitorColor, endRowAndCol)) {
             try {
-                type = findPieceType(params[2]);
+                type = findPieceType(params[3]);
             } catch (Exception ex) {
                 return ex.getMessage();
             }
         }
 
-        // try making the move - if an exception is caught, then move was invalid and was not made
-        ChessMove potentialMove = new ChessMove(new ChessPosition(startRowAndCol[0], startRowAndCol[1]),
-                new ChessPosition(endRowAndCol[0], endRowAndCol[1]), type);
         try {
+            // try making the move - if an exception is caught, then move was invalid and was not made
+            ChessMove potentialMove = new ChessMove(new ChessPosition(startRowAndCol[0], startRowAndCol[1]),
+                    new ChessPosition(endRowAndCol[0], endRowAndCol[1]), type);
             currGame.makeMove(potentialMove);
-            // make move in database
-//            server.updateGame();
             ws = new WebSocketFacade(serverUrl, notificationHandler, visitorName);
             ws.sendMessage(UserGameCommand.CommandType.MAKE_MOVE, this.authToken, game.gameID(),
-                    visitorColor, new String[] {params[0], params[1]}, currGame);
-            return String.format("Move made: %s to %s", params[0], params[1]);
+                    visitorColor, new String[] {params[1], params[2]}, currGame);
+            return String.format("Move made: %s to %s", params[1], params[2]);
         } catch (InvalidMoveException ex) {
-            return "Invalid move. Try <highlight> to see valid moves";
+            return ex.getMessage();
         }
     }
 
@@ -282,6 +296,11 @@ public class ChessClient {
 
     public ModifiedGameData getGame() {
         return this.game;
+    }
+
+    public boolean atEndOfBoard(String visitorColor, int[] rowAndCol) {
+        return (visitorColor.equals("WHITE") && rowAndCol[0] == 8) || (
+                visitorColor.equals("BLACK") && rowAndCol[0] == 1);
     }
 
     public String clear() throws ResponseException {

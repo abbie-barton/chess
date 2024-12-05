@@ -108,10 +108,9 @@ public class Server {
     }
 
     private String updateGame(Request req, Response res) throws Exception {
-        String authToken = req.headers("authorization");
         GameData game = serializer.fromJson(req.body(), GameData.class);
         // will replace the game in the database with the new game
-        service.updateMoves(authToken, game);
+        service.updateMoves(game.gameID(), game.game());
         res.status(200);
         return serializer.toJson(Map.of("message", "Success"));
     }

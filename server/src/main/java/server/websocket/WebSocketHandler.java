@@ -33,7 +33,8 @@ public class WebSocketHandler {
             username = getAuth(action.getAuthToken());
             switch (action.getCommandType()) {
                 case CONNECT -> connect(username, action.getGameID(), action.getVisitorColor(), session);
-                case MAKE_MOVE -> makeMove(username, action.getVisitorColor(), action.getGameID(), action.getMoveMade());
+                case MAKE_MOVE -> makeMove(username, action.getVisitorColor(), action.getGameID(), action.getMoveMade(),
+                        action.getGameToUpdate());
                 case LEAVE -> leave(username, action.getGameID(), action.getVisitorColor());
                 case RESIGN -> resign(username, action.getGameID(), action.getVisitorColor());
             }
@@ -65,8 +66,12 @@ public class WebSocketHandler {
         }
     }
 
-    private void makeMove(String visitorName, String color, int gameID, String[] moveMade) throws IOException {
+    private void makeMove(String visitorName, String color, int gameID, String[] moveMade,
+                          ChessGame gameToUpdate) throws IOException {
         try {
+            // update the game in the database
+            updateGameMoves(gameID, gameToUpdate);
+
             ServerMessage notification = getGameNotification(visitorName, gameID);
             // send LOAD_GAME message to root
             connections.alertRoot(visitorName, notification);
@@ -79,7 +84,6 @@ public class WebSocketHandler {
             this.notification(visitorName, gameID, notifyMessage);
 
             // check if game in check or checkmate
-            ChessGame currGame = getGame(gameID).game();
             ChessGame.TeamColor teamColor;
             // use opposite color of current color
             String oppositeColor;
@@ -90,12 +94,12 @@ public class WebSocketHandler {
                 teamColor = ChessGame.TeamColor.WHITE;
                 oppositeColor = "white";
             }
-            if (currGame.isInCheckmate(teamColor)) {
+            if (gameToUpdate.isInCheckmate(teamColor)) {
                 sendToAll(visitorName, String.format("%s is in checkmate. Game is over.", oppositeColor));
                 markGameAsOver(gameID);
-            } else if (currGame.isInCheck(teamColor)) {
+            } else if (gameToUpdate.isInCheck(teamColor)) {
                 sendToAll(visitorName, String.format("%s is in check.", oppositeColor));
-            } else if (currGame.isInStalemate(teamColor)) {
+            } else if (gameToUpdate.isInStalemate(teamColor)) {
                 sendToAll(visitorName, "Game is in stalemate. Game is over.");
                 markGameAsOver(gameID);
             }

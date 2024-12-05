@@ -81,11 +81,11 @@ public class ChessGame {
 
         if (currPiece == null) {
             // no starting piece
-            throw new InvalidMoveException();
+            throw new InvalidMoveException("No starting piece provided. Expected: make move <START_POSITION> <END_POSITION>");
         }
         if (currPiece.getTeamColor() != this.teamTurn) {
             // if the piece color is not this.teamTurn
-            throw new InvalidMoveException();
+            throw new InvalidMoveException("It isn't your turn!");
         }
 
         try {
@@ -103,7 +103,7 @@ public class ChessGame {
                 this.teamTurn = TeamColor.WHITE;
             }
         } catch (Exception InvalidMoveException) {
-            throw new InvalidMoveException();
+            throw new InvalidMoveException("Invalid move. Try <highlight> to see valid moves");
         }
     }
 
@@ -114,7 +114,7 @@ public class ChessGame {
         if (move.getEndPosition().getColumn() > 8 || move.getEndPosition().getColumn() < 1 ||
             move.getEndPosition().getRow() > 8 || move.getEndPosition().getRow() < 1) {
             // end position is out of bounds
-            throw new InvalidMoveException();
+            throw new InvalidMoveException("End position is out of bounds.");
         }
 
         // get possible moves & check if endPosition matches possible moves
@@ -128,7 +128,7 @@ public class ChessGame {
             }
         }
         if (!valid) {
-            throw new InvalidMoveException();
+            throw new InvalidMoveException("Invalid move. Try <highlight> to see valid moves");
         }
 
         if (board.getPiece(move.getEndPosition()) != null) {
@@ -149,7 +149,7 @@ public class ChessGame {
             } else {
                 board.addPiece(move.getEndPosition(), null);
             }
-            throw new InvalidMoveException();
+            throw new InvalidMoveException("");
         }
 
         // undo - the move is valid
