@@ -288,6 +288,7 @@ public class MySqlDataAccess implements DataAccess {
                 `black_username` varchar(32),
                 `game_name` varchar(32) NOT NULL,
                 `game` varchar(2048) NOT NULL,
+                `is_over` TINYINT(1) NOT NULL DEFAULT 0,
                 PRIMARY KEY (`id`),
                 INDEX(game_name)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=1
