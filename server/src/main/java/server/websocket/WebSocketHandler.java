@@ -95,8 +95,12 @@ public class WebSocketHandler {
             connections.broadcast(visitorName, notification, gameID);
 
             // send move made notification
-            // String notifyMessage = String.format("%s made a move: %s to %s", visitorName, moveMade[0], moveMade[1]);
-            String notifyMessage = String.format("%s made a move!", visitorName);
+            String notifyMessage;
+            if (moveMade.length != 0) {
+                notifyMessage = String.format("%s made a move: %s to %s", visitorName, moveMade[0], moveMade[1]);
+            } else {
+                notifyMessage = String.format("%s made a move!", visitorName);
+            }
             this.notification(visitorName, gameID, notifyMessage);
 
             // check if game in check or checkmate
