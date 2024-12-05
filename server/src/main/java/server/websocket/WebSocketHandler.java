@@ -18,7 +18,6 @@ import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Map;
 
 @WebSocket
@@ -96,7 +95,7 @@ public class WebSocketHandler {
 
             // send move made notification
             String notifyMessage;
-            if (moveMade.length != 0) {
+            if (moveMade != null) {
                 notifyMessage = String.format("%s made a move: %s to %s", visitorName, moveMade[0], moveMade[1]);
             } else {
                 notifyMessage = String.format("%s made a move!", visitorName);
