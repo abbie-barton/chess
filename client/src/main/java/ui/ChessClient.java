@@ -182,7 +182,7 @@ public class ChessClient {
         if (params.length <= 2) {
             return "Expected: make move <START_POSITION> <END_POSITION>";
         }
-        if (game.is_over() == 1) {
+        if (game.isOver() == 1) {
             return "Game is over. You cannot make any more moves.";
         }
 

@@ -69,7 +69,7 @@ public class WebSocketHandler {
     private void makeMove(String visitorName, int gameID, String[] moveMade, ChessMove move, Session session) throws IOException {
         try {
             ModifiedGameData game = getGame(gameID);
-            if (game.is_over() == 1) {
+            if (game.isOver() == 1) {
                 throw new UnauthorizedException(200, "Error: game is over. You cannot make any more moves.");
             }
             if (move != null) {
@@ -147,7 +147,7 @@ public class WebSocketHandler {
     private void resign(String visitorName, int gameID, String color, Session session) throws IOException {
         try {
             ModifiedGameData game = getGame(gameID);
-            if (game.is_over() == 1) {
+            if (game.isOver() == 1) {
                 throw new UnauthorizedException(200, "Error: game is already over.");
             }
             if (getCurrColor(visitorName, game) == null) {

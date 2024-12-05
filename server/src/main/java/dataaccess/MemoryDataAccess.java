@@ -99,7 +99,7 @@ public class MemoryDataAccess implements DataAccess {
     public void updateGameMoves(int gameID, ChessGame newGame) {
         ModifiedGameData game = games.get(gameID);
         ModifiedGameData updatedGame = new ModifiedGameData(game.gameID(), game.whiteUsername(),
-                game.blackUsername(), game.gameName(), newGame, game.is_over());
+                game.blackUsername(), game.gameName(), newGame, game.isOver());
         games.put(gameID, updatedGame);
     }
 
