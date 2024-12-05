@@ -168,6 +168,9 @@ public class ChessClient {
         this.game = new ModifiedGameData(game.gameID(), game.whiteUsername(), game.blackUsername(),
                 game.gameName(), game.game(), 1);
         this.state = State.LOGGED_IN;
+        // mark game as over
+        server.markGameAsOver(authToken, game.gameID());
+
         ws = new WebSocketFacade(serverUrl, notificationHandler, visitorName);
         ws.sendMessage(UserGameCommand.CommandType.RESIGN, this.authToken, game.gameID(),
                 visitorColor, null, null);
@@ -211,6 +214,10 @@ public class ChessClient {
             ChessMove potentialMove = new ChessMove(new ChessPosition(startRowAndCol[0], startRowAndCol[1]),
                     new ChessPosition(endRowAndCol[0], endRowAndCol[1]), type);
             currGame.makeMove(potentialMove);
+
+            // update game in database
+            server.updateGame(authToken, game.gameID(), currGame);
+
             ws = new WebSocketFacade(serverUrl, notificationHandler, visitorName);
             ws.sendMessage(UserGameCommand.CommandType.MAKE_MOVE, this.authToken, game.gameID(),
                     visitorColor, new String[] {params[1], params[2]}, currGame);

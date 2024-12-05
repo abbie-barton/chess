@@ -55,6 +55,10 @@ public class Server {
         Spark.put("/update-game", this::updateGame);
         Spark.exception(Exception.class, this::exceptionHandler);
 
+        // update game over endpoint
+        Spark.put("/update-game-over", this::markGameAsOver);
+        Spark.exception(Exception.class, this::exceptionHandler);
+
         // clear endpoint
         Spark.delete("/db", this::clear);
         Spark.exception(Exception.class, this::exceptionHandler);
@@ -108,9 +112,16 @@ public class Server {
     }
 
     private String updateGame(Request req, Response res) throws Exception {
-        GameData game = serializer.fromJson(req.body(), GameData.class);
+        UpdateGameRequest game = serializer.fromJson(req.body(), UpdateGameRequest.class);
         // will replace the game in the database with the new game
         service.updateMoves(game.gameID(), game.game());
+        res.status(200);
+        return serializer.toJson(Map.of("message", "Success"));
+    }
+
+    private String markGameAsOver(Request req, Response res) throws Exception {
+        UpdateGameRequest game = serializer.fromJson(req.body(), UpdateGameRequest.class);
+        service.markGameAsOver(game.gameID());
         res.status(200);
         return serializer.toJson(Map.of("message", "Success"));
     }

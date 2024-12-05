@@ -7,10 +7,12 @@ import java.io.IOException;
 public class Connection {
     public String visitorName;
     public Session session;
+    public int gameID;
 
-    public Connection(String visitorName, Session session) {
+    public Connection(String visitorName, Session session, int gameID) {
         this.visitorName = visitorName;
         this.session = session;
+        this.gameID = gameID;
     }
 
     public void send(String msg) throws IOException {

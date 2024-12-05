@@ -1,5 +1,6 @@
 package ui;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import model.*;
 
@@ -53,6 +54,18 @@ public class ServerFacade {
         var path = "/game";
         JoinGameRequest game = new JoinGameRequest(playerColor, gameID);
         this.makeRequest("PUT", path, game, null, authToken);
+    }
+
+    public void updateGame(String authToken, int gameID, ChessGame game) throws ResponseException {
+        var path = "/update-game";
+        UpdateGameRequest req = new UpdateGameRequest(gameID, game);
+        this.makeRequest("PUT", path, req, null, authToken);
+    }
+
+    public void markGameAsOver(String authToken, int gameID) throws ResponseException {
+        var path = "/update-game-over";
+        UpdateGameRequest req = new UpdateGameRequest(gameID, null);
+        this.makeRequest("PUT", path, req, null, authToken);
     }
 
     public void clear() throws ResponseException {

@@ -20,9 +20,10 @@ public class UserGameCommand {
     private final String visitorColor;
     private final String[] moveMade;
     private final ChessGame gameToUpdate;
+    private final ChessMove move;
 
     public UserGameCommand(CommandType commandType, String authToken, Integer gameID, String visitorName, String visitorColor,
-                String[] moveMade, ChessGame gameToUpdate) {
+                String[] moveMade, ChessGame gameToUpdate, ChessMove move) {
         this.commandType = commandType;
         this.authToken = authToken;
         this.gameID = gameID;
@@ -30,6 +31,7 @@ public class UserGameCommand {
         this.visitorColor = visitorColor;
         this.moveMade = moveMade;
         this.gameToUpdate = gameToUpdate;
+        this.move = move;
     }
 
     public enum CommandType {
@@ -53,6 +55,10 @@ public class UserGameCommand {
 
     public String[] getMoveMade() {
         return moveMade;
+    }
+
+    public ChessMove getMove() {
+        return move;
     }
 
     public String getVisitorColor() {
